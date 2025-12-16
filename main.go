@@ -41,6 +41,10 @@ func main() {
 	r.GET("/songs", func(c *gin.Context) {
 		handlers.FetchSongs(c, db)
 	})
+	r.DELETE("/songs", func(c *gin.Context) {
+		handlers.DeleteSongs(c, db)
+	})
+
 	r.GET("/read/:playlistID", func(c *gin.Context) {
 		handlers.FetchTracks(c, db)
 	})

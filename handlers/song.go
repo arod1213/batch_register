@@ -15,3 +15,13 @@ func FetchSongs(c *gin.Context, db *gorm.DB) {
 	}
 	c.JSON(200, gin.H{"data": songs})
 }
+
+func DeleteSongs(c *gin.Context, db *gorm.DB) {
+	var songs []models.Song
+	err := db.Where("title IS NOT NULL").Delete(&songs).Error
+	if err != nil {
+		c.JSON(400, gin.H{"error": "failed to delete songs"})
+		return
+	}
+	c.JSON(200, gin.H{"data": "successfully reset songs"})
+}
