@@ -54,20 +54,23 @@ func sxFromInfo(info Info) SX {
 	duration := fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 
 	return SX{
-		duration:            duration,
-		claimBasis:          CO,
-		claimPercent:        info.Share.MasterPercent,
+		duration:     duration,
+		claimBasis:   CO,
+		claimPercent: info.Share.MasterPercent,
+
 		collectionBeganDate: info.Song.ReleaseDate,
-		collectionEndDate:   time.Date(9999, time.Month(12), 30, 0, 0, 0, 0, time.Now().Location()),
-		title:               info.Song.Title,
-		releaseTitle:        info.Song.Title,
-		artist:              info.Song.Artist,
-		releaseArtist:       info.Song.Artist,
-		iswc:                info.Song.Iswc,
-		isrc:                info.Song.Isrc,
-		upc:                 info.Song.Upc,
-		releaseLabel:        info.Song.Label,
+		dateOfFirstRelease:  &info.Song.ReleaseDate, // this may need to change
 		releaseDate:         info.Song.ReleaseDate,
+		collectionEndDate:   time.Date(9999, time.Month(12), 30, 0, 0, 0, 0, time.Now().Location()),
+
+		title:         info.Song.Title,
+		releaseTitle:  info.Song.Title,
+		artist:        info.Song.Artist,
+		releaseArtist: info.Song.Artist,
+		iswc:          info.Song.Iswc,
+		isrc:          info.Song.Isrc,
+		upc:           info.Song.Upc,
+		releaseLabel:  info.Song.Label,
 	}
 }
 
