@@ -54,6 +54,7 @@ func main() {
 
 	err = http.ListenAndServe(":8080", r.Handler())
 	if err != nil {
+		fmt.Println("error setting up", err.Error())
 		os.Exit(1)
 	}
 }
