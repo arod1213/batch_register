@@ -38,6 +38,7 @@ type MLC struct {
 
 func fromInfo(info Info) MLC {
 	return MLC{
+		admin:               nil,
 		collectionShare:     info.Share.PubPercent,
 		title:               info.Song.Title,
 		recordingTitle:      info.Song.Title,
