@@ -11,7 +11,8 @@ func FetchSongs(c *gin.Context, db *gorm.DB) {
 
 	query := db
 	if title != "" {
-		query = query.Where("title LIKE ?", "%"+title+"%")
+		str := "%" + title + "%"
+		query = query.Where("title LIKE ? OR artist LIKE ?", str, str)
 	}
 
 	var songs []models.Song
