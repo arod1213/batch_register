@@ -1,1 +1,3 @@
 *.xslx
+*.env
+*/.env
