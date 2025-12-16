@@ -7,8 +7,16 @@ import (
 )
 
 func FetchSongs(c *gin.Context, db *gorm.DB) {
+	title := c.Query("title")
+
+	query := db
+	if title != "" {
+		query = query.Where("title LIKE ?", title)
+	}
+
 	var songs []models.Song
-	err := db.Find(&songs).Error
+	err := query.Find(&songs).Order("release_date DESC").Error
+
 	if err != nil {
 		c.JSON(400, gin.H{"error": "could not find any songs"})
 		return
