@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/arod1213/auto_ingestion/database"
 	"github.com/arod1213/auto_ingestion/handlers"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,11 @@ import (
 
 func main() {
 	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("err is ", err)
+		os.Exit(1)
+	}
+	db, err := database.Setup()
 	if err != nil {
 		fmt.Println("err is ", err)
 		os.Exit(1)
@@ -32,8 +38,13 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	r.GET("/songs", func(c *gin.Context) {
+		handlers.FetchSongs(c, db)
+	})
 	r.GET("/read/:playlistID", handlers.FetchTracks)
-	r.POST("/write", handlers.WriteTracks)
+	r.POST("/write", func(c *gin.Context) {
+		handlers.WriteTracks(c, db)
+	})
 
 	err = http.ListenAndServe(":8080", r.Handler())
 	if err != nil {

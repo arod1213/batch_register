@@ -4,11 +4,13 @@ import (
 	"archive/zip"
 	"bytes"
 	"fmt"
+	"log"
 	"slices"
 
 	"github.com/arod1213/auto_ingestion/models"
 	"github.com/arod1213/auto_ingestion/spotify"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func FetchTracks(c *gin.Context) {
@@ -25,7 +27,15 @@ func FetchTracks(c *gin.Context) {
 	c.JSON(200, gin.H{"data": tracks})
 }
 
-func WriteTracks(c *gin.Context) {
+func SaveSongs(db *gorm.DB, data []models.Info) error {
+	var songs []models.Song
+	for _, i := range data {
+		songs = append(songs, i.Song)
+	}
+	return db.Save(&songs).Error
+}
+
+func WriteTracks(c *gin.Context, db *gorm.DB) {
 	var data []models.Info
 	err := c.ShouldBindBodyWithJSON(&data)
 	if err != nil {
@@ -33,6 +43,13 @@ func WriteTracks(c *gin.Context) {
 		c.JSON(400, gin.H{"err": err.Error()})
 		return
 	}
+
+	go func() {
+		err := SaveSongs(db, data) // async call
+		if err != nil {
+			log.Println("error saving songs")
+		}
+	}()
 
 	buf := new(bytes.Buffer)
 	zipWriter := zip.NewWriter(buf)

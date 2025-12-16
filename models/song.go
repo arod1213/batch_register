@@ -34,15 +34,15 @@ func (s Society) ToCode() string {
 }
 
 type Song struct {
-	Title       string
-	Artist      string
-	Iswc        string
-	Isrc        string
-	Upc         uint64
-	Label       string
-	ReleaseDate time.Time
-	Duration    time.Duration
-	Url         string
+	Title       string        `gorm:"type:varchar(255);not null"`
+	Artist      string        `gorm:"type:varchar(255);not null"`
+	Iswc        string        `gorm:"type:varchar(15)"`
+	Isrc        string        `gorm:"type:varchar(15);uniqueIndex;not null"`
+	Upc         uint64        `gorm:""`
+	Label       string        `gorm:"type:varchar(255)"`
+	ReleaseDate time.Time     `gorm:"type:date"`
+	Duration    time.Duration `gorm:"-"`
+	Url         string        `gorm:"type:text"`
 }
 
 type Share struct {
