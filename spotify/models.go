@@ -52,11 +52,12 @@ func (a album) updateSong(s *models.Song) {
 }
 
 type track struct {
-	Album       trackAlbum  `json:"album"`
-	Artists     []artist    `json:"artists"`
-	Name        string      `json:"name"`
-	ExternalIds externalIDs `json:"external_ids"`
-	Duration    uint32      `json:"duration_ms"`
+	Album        trackAlbum   `json:"album"`
+	Artists      []artist     `json:"artists"`
+	Name         string       `json:"name"`
+	ExternalIds  externalIDs  `json:"external_ids"`
+	Duration     uint32       `json:"duration_ms"`
+	ExternalUrls externalUrls `json:"external_urls"`
 }
 
 func (t track) toSong() models.Song {
@@ -73,11 +74,16 @@ func (t track) toSong() models.Song {
 	duration, _ := time.ParseDuration(dStr)
 
 	return models.Song{
+		Url:      t.ExternalUrls.Spotify,
 		Duration: duration,
 		Title:    t.Name,
 		Artist:   artist,
 		Isrc:     isrc,
 	}
+}
+
+type externalUrls struct {
+	Spotify string `json:"spotify"`
 }
 
 type externalIDs struct {

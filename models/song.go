@@ -40,6 +40,7 @@ type Song struct {
 	Label       string
 	ReleaseDate time.Time
 	Duration    time.Duration
+	Url         string
 }
 
 type Share struct {
