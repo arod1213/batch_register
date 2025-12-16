@@ -13,29 +13,33 @@ import (
 	"gorm.io/gorm"
 )
 
-func FetchTracks(c *gin.Context) {
+func FetchTracks(c *gin.Context, db *gorm.DB) {
 	playlistID := c.Param("playlistID")
 	fmt.Println("id is ", playlistID)
-	tracks := spotify.PlaylistToTracks(playlistID)
-	slices.SortFunc(tracks, func(x models.Song, y models.Song) int {
+	songs := spotify.PlaylistToTracks(playlistID)
+	slices.SortFunc(songs, func(x models.Song, y models.Song) int {
 		return y.ReleaseDate.Compare(x.ReleaseDate)
 	})
-	if len(tracks) == 0 {
+	if len(songs) == 0 {
 		c.JSON(400, gin.H{"error": "no songs found: ensure your playlist is public"})
 		return
 	}
-	c.JSON(200, gin.H{"data": tracks})
+
+	go func() {
+		err := SaveSongs(db, songs) // async call
+		if err != nil {
+			log.Println("error saving songs")
+		}
+	}()
+
+	c.JSON(200, gin.H{"data": songs})
 }
 
-func SaveSongs(db *gorm.DB, data []models.Info) error {
-	var songs []models.Song
-	for _, i := range data {
-		songs = append(songs, i.Song)
-	}
+func SaveSongs(db *gorm.DB, songs []models.Song) error {
 	return db.Save(&songs).Error
 }
 
-func WriteTracks(c *gin.Context, db *gorm.DB) {
+func WriteTracks(c *gin.Context) {
 	var data []models.Info
 	err := c.ShouldBindBodyWithJSON(&data)
 	if err != nil {
@@ -43,13 +47,6 @@ func WriteTracks(c *gin.Context, db *gorm.DB) {
 		c.JSON(400, gin.H{"err": err.Error()})
 		return
 	}
-
-	go func() {
-		err := SaveSongs(db, data) // async call
-		if err != nil {
-			log.Println("error saving songs")
-		}
-	}()
 
 	buf := new(bytes.Buffer)
 	zipWriter := zip.NewWriter(buf)

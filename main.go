@@ -41,9 +41,11 @@ func main() {
 	r.GET("/songs", func(c *gin.Context) {
 		handlers.FetchSongs(c, db)
 	})
-	r.GET("/read/:playlistID", handlers.FetchTracks)
+	r.GET("/read/:playlistID", func(c *gin.Context) {
+		handlers.FetchTracks(c, db)
+	})
 	r.POST("/write", func(c *gin.Context) {
-		handlers.WriteTracks(c, db)
+		handlers.WriteTracks(c)
 	})
 
 	err = http.ListenAndServe(":8080", r.Handler())
