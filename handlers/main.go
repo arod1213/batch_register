@@ -18,6 +18,10 @@ func FetchTracks(c *gin.Context) {
 	slices.SortFunc(tracks, func(x models.Song, y models.Song) int {
 		return y.ReleaseDate.Compare(x.ReleaseDate)
 	})
+	if len(tracks) == 0 {
+		c.JSON(400, gin.H{"error": "no songs found: ensure your playlist is public"})
+		return
+	}
 	c.JSON(200, gin.H{"data": tracks})
 }
 

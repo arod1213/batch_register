@@ -37,7 +37,8 @@ type MLC struct {
 }
 
 func fromInfo(info Info) MLC {
-	fullName := fmt.Sprintf("%s %s", info.Share.Person.FirstName, info.Share.Person.LastName)
+	// publisher := info.Share.Person.PubEntity.AdminOrPub()
+
 	return MLC{
 		iswc:            info.Song.Iswc,
 		title:           info.Song.Title,
@@ -54,9 +55,9 @@ func fromInfo(info Info) MLC {
 		writerLastName:  info.Share.Person.LastName,
 		writerIpiNum:    info.Share.Person.WriterIpiNum,
 
-		publisherName:   fullName, // TODO: change this
-		publisherIpiNum: info.Share.Person.PubIpiNum,
-		writerRoleCode:  "CA", // change this
+		// publisherName:   publisher.Name,
+		// publisherIpiNum: publisher.IpiNum,
+		writerRoleCode: "CA", // change this
 	}
 }
 

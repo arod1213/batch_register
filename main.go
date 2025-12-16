@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -14,6 +15,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
+		fmt.Println("err is ", err)
 		os.Exit(1)
 	}
 

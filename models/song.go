@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Society string
 
@@ -53,8 +55,9 @@ type Person struct {
 	FirstName    string
 	LastName     string
 	WriterIpiNum uint64
-	PubIpiNum    uint64
-	Society      Society
+	// PubIpiNum    uint64
+	Society Society
+	// PubEntity publishers.Entity
 }
 
 type Info struct {

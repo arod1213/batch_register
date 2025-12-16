@@ -3,10 +3,10 @@ package models
 type CWR struct {
 }
 
-func cwrFromInfo(info Info) CWR {
-
-	return CWR{}
-}
+// func cwrFromInfo(info Info) CWR {
+//
+// 	return CWR{}
+// }
 
 // HDRPB000000199THE SENDER                                   01.102018032210203720180322
 // GRHNWR0000102.100000000000

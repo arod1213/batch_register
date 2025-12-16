@@ -26,7 +26,7 @@ type Publisher struct {
 	Entity Entity
 }
 
-func (e Entity) AdminOrPub(territory string) Publisher {
+func (e Entity) AdminOrPub() Publisher {
 	var name string
 	var ipiNum uint64
 	var number string
@@ -89,7 +89,7 @@ func (e Entity) AdminOrPub(territory string) Publisher {
 	}
 }
 
-func (e Entity) Publisher(territory string) (*Publisher, error) {
+func (e Entity) Publisher() (*Publisher, error) {
 	var name string
 	var ipiNum uint64
 	var number string
