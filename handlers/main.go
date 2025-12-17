@@ -9,6 +9,7 @@ import (
 
 	"github.com/arod1213/auto_ingestion/models"
 	"github.com/arod1213/auto_ingestion/spotify"
+	"github.com/arod1213/auto_ingestion/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -52,7 +53,11 @@ func SaveSongs(db *gorm.DB, songs []models.Song) error {
 	return db.Save(&songs).Error
 }
 
-func WriteTracks(c *gin.Context) {
+func UpdateSongs(db *gorm.DB, songs []models.Song) error {
+	return db.Save(&songs).Error
+}
+
+func WriteTracks(c *gin.Context, db *gorm.DB) {
 	var data []models.Info
 	err := c.ShouldBindBodyWithJSON(&data)
 	if err != nil {
@@ -60,6 +65,18 @@ func WriteTracks(c *gin.Context) {
 		c.JSON(400, gin.H{"err": err.Error()})
 		return
 	}
+
+	go func() {
+		songs := utils.Map(data, func(info models.Info) models.Song {
+			s := info.Song
+			s.Registered = true
+			return s
+		})
+		err := SaveSongs(db, songs)
+		if err != nil {
+			log.Println("error saving songs")
+		}
+	}()
 
 	buf := new(bytes.Buffer)
 	zipWriter := zip.NewWriter(buf)

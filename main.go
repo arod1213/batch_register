@@ -53,7 +53,7 @@ func main() {
 		handlers.FetchTracks(c, db)
 	})
 	r.POST("/write", func(c *gin.Context) {
-		handlers.WriteTracks(c)
+		handlers.WriteTracks(c, db)
 	})
 
 	err = http.ListenAndServe(":8080", r.Handler())
