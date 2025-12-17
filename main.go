@@ -38,20 +38,23 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	// SIMPLE CRUD
 	r.GET("/songs", func(c *gin.Context) {
 		handlers.FetchSongs(c, db)
+	})
+	r.DELETE("/songs", func(c *gin.Context) {
+		handlers.DeleteSongs(c, db)
 	})
 	r.POST("/register/:isrc", func(c *gin.Context) {
 		handlers.MarkRegistered(c, db)
 	})
 
-	r.DELETE("/songs", func(c *gin.Context) {
-		handlers.DeleteSongs(c, db)
-	})
-
+	// SPOTIFY CALLS
 	r.GET("/read/:id", func(c *gin.Context) {
 		handlers.FetchTracks(c, db)
 	})
+
+	// EXCEL GENERATION
 	r.POST("/write", func(c *gin.Context) {
 		handlers.WriteTracks(c, db)
 	})
