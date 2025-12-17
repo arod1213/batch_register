@@ -43,6 +43,9 @@ func main() {
 	r.GET("/songs", func(c *gin.Context) {
 		handlers.FetchSongs(c, db)
 	})
+	r.PUT("/song", func(c *gin.Context) {
+		handlers.UpdateSong(c, db)
+	})
 	r.DELETE("/songs", func(c *gin.Context) {
 		handlers.DeleteSongs(c, db)
 	})

@@ -9,6 +9,35 @@ import (
 	"gorm.io/gorm"
 )
 
+func UpdateSong(c *gin.Context, db *gorm.DB) {
+	var song models.Song
+	err := c.ShouldBindBodyWithJSON(&song)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid body"})
+		return
+	}
+	tx := db.Begin()
+	if song.Share != nil {
+		song.Share.SongIsrc = song.Isrc
+		err = tx.Save(song.Share).Error
+		if err != nil {
+			tx.Rollback()
+			c.JSON(500, gin.H{"error": "failed to save"})
+			return
+		}
+	}
+
+	err = tx.Save(&song).Error
+	if err != nil {
+		tx.Rollback()
+		c.JSON(500, gin.H{"error": "failed to save"})
+		return
+	}
+
+	tx.Commit()
+	c.JSON(200, gin.H{"data": "saved song"})
+}
+
 func MarkRegistered(c *gin.Context, db *gorm.DB) {
 	isrc := c.Param("isrc")
 	err := db.Model(&models.Song{}).Where("isrc = ?", isrc).Update("registered", true).Error

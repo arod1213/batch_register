@@ -81,7 +81,7 @@ func WriteTracks(c *gin.Context, db *gorm.DB) {
 			share := song.Share
 			share.SongIsrc = song.Isrc
 
-			err := tx.Where("isrc = ?", song.Isrc).Save(&song).Error
+			err := tx.Save(&song).Error
 			if err != nil {
 				tx.Rollback()
 			}

@@ -41,7 +41,7 @@ type Song struct {
 	Label  string `gorm:"type:varchar(255)"`
 
 	Iswc *string `gorm:"type:varchar(15)"`
-	Isrc string  `gorm:"type:varchar(15);uniqueIndex;not null"`
+	Isrc string  `gorm:"primaryKey;type:varchar(15)"`
 	Upc  uint64  `gorm:"type:integer;not null"`
 
 	Url         string        `gorm:"type:text"`
@@ -65,7 +65,7 @@ type Share struct {
 	PubPercent    float32 `gorm:"type:real;not null"`
 	Person        Person  `gorm:"-" json:"-"`
 
-	SongIsrc string `gorm:"type:varchar(15);not null;index" json:"-"`
+	SongIsrc string `gorm:"primaryKey;type:varchar(15)" json:"-"`
 	Song     Song   `gorm:"foreignKey:SongIsrc;references:Isrc;constraint:OnDelete:CASCADE;" json:"-"`
 }
 
