@@ -57,6 +57,8 @@ func ArtistToTracks(id string) []models.Song {
 	}
 
 	var wg sync.WaitGroup
+	var mu sync.Mutex // prevent data race on save songs
+
 	for _, item := range a.Items {
 		wg.Add(1)
 		go func() {
@@ -68,7 +70,10 @@ func ArtistToTracks(id string) []models.Song {
 			for _, item := range a.Tracks.Items {
 				song := item.Track.toSong()
 				a.updateSong(&song)
+
+				mu.Lock()
 				x = append(x, song)
+				mu.Unlock()
 			}
 			wg.Done()
 		}()

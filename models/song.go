@@ -27,8 +27,8 @@ func (s Society) ToCode() string {
 		return "046"
 	case PRS:
 		return "052"
-		// case HFA:
 		// 	return "034"
+		// case HFA:
 	}
 	panic("unreachable - fell through switch")
 }
@@ -43,6 +43,7 @@ type Song struct {
 	ReleaseDate time.Time     `gorm:"type:date"`
 	Duration    time.Duration `gorm:"-"`
 	Url         string        `gorm:"type:text"`
+	Registered  bool          `gorm:"type:integer;default:0"`
 }
 
 type Share struct {

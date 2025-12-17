@@ -2,6 +2,7 @@ package spotify
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -51,6 +52,12 @@ func fetchBody(endpoint string, accessToken string, requestType string) ([]byte,
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	statusCode := resp.StatusCode
+	if statusCode < 200 || statusCode > 200 {
+		errStr := fmt.Sprintln("Bad request: received non 200 err code")
+		return []byte{}, errors.New(errStr)
+	}
 
 	// Read response
 	body, err := io.ReadAll(resp.Body)

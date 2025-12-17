@@ -41,6 +41,10 @@ func main() {
 	r.GET("/songs", func(c *gin.Context) {
 		handlers.FetchSongs(c, db)
 	})
+	r.POST("/register/:isrc", func(c *gin.Context) {
+		handlers.MarkRegistered(c, db)
+	})
+
 	r.DELETE("/songs", func(c *gin.Context) {
 		handlers.DeleteSongs(c, db)
 	})
