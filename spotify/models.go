@@ -8,6 +8,14 @@ import (
 	"github.com/arod1213/auto_ingestion/models"
 )
 
+type artistAlbums struct {
+	Items []artistAlbum `json:"items"`
+}
+
+type artistAlbum struct {
+	Id string `json:"id"`
+}
+
 type auth struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
@@ -36,6 +44,7 @@ type album struct {
 	ExternalIds externalIDs `json:"external_ids"`
 	Label       string      `json:"label"`
 	ReleaseDate PartialDate `json:"release_date"`
+	Tracks      tracksInfo  `json:"tracks"`
 }
 
 func (a album) updateSong(s *models.Song) {

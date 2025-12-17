@@ -14,9 +14,22 @@ import (
 )
 
 func FetchTracks(c *gin.Context, db *gorm.DB) {
-	playlistID := c.Param("playlistID")
-	fmt.Println("id is ", playlistID)
-	songs := spotify.PlaylistToTracks(playlistID)
+	var songs []models.Song
+
+	id := c.Param("id")
+	method := c.Query("method")
+
+	switch method {
+	case "artist":
+		songs = spotify.ArtistToTracks(id)
+	case "album":
+		songs = spotify.AlbumToTracks(id)
+	case "playlist":
+		songs = spotify.PlaylistToTracks(id)
+	default:
+		songs = spotify.PlaylistToTracks(id)
+	}
+
 	slices.SortFunc(songs, func(x models.Song, y models.Song) int {
 		return y.ReleaseDate.Compare(x.ReleaseDate)
 	})

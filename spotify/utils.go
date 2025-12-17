@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -26,6 +27,7 @@ func getModel[T any](endpoint string, auth *auth) (*T, error) {
 	var x T
 	err = json.Unmarshal(body, &x)
 	if err != nil {
+		log.Printf("unmarshall error: received %s", string(body))
 		return nil, err
 	}
 	return &x, nil

@@ -45,7 +45,7 @@ func main() {
 		handlers.DeleteSongs(c, db)
 	})
 
-	r.GET("/read/:playlistID", func(c *gin.Context) {
+	r.GET("/read/:id", func(c *gin.Context) {
 		handlers.FetchTracks(c, db)
 	})
 	r.POST("/write", func(c *gin.Context) {
