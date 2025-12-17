@@ -13,7 +13,7 @@ func Setup() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&models.Song{})
+	err = db.AutoMigrate(&models.Song{}, &models.Share{})
 	if err != nil {
 		return nil, err
 	}

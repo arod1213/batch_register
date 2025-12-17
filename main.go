@@ -19,6 +19,7 @@ func main() {
 		fmt.Println("err is ", err)
 		os.Exit(1)
 	}
+
 	db, err := database.Setup()
 	if err != nil {
 		fmt.Println("err is ", err)

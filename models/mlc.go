@@ -36,24 +36,27 @@ type MLC struct {
 	recordingLabel      string
 }
 
-func fromInfo(info Info) MLC {
-	// publisher := info.Share.Person.PubEntity.AdminOrPub()
+func fromInfo(s Song) MLC {
+	var iswc string
+	if s.Iswc != nil {
+		iswc = *s.Iswc
+	}
 
 	return MLC{
-		iswc:            info.Song.Iswc,
-		title:           info.Song.Title,
-		collectionShare: info.Share.PubPercent,
+		iswc:            iswc,
+		title:           s.Title,
+		collectionShare: s.Share.PubPercent,
 
-		recordingTitle:      info.Song.Title,
-		recordingArtistName: info.Song.Artist,
-		recordingISRC:       info.Song.Isrc,
-		recordingLabel:      info.Song.Label,
+		recordingTitle:      s.Title,
+		recordingArtistName: s.Artist,
+		recordingISRC:       s.Isrc,
+		recordingLabel:      s.Label,
 
 		admin: nil,
 
-		writerFirstName: info.Share.Person.FirstName,
-		writerLastName:  info.Share.Person.LastName,
-		writerIpiNum:    info.Share.Person.WriterIpiNum,
+		writerFirstName: s.Share.Person.FirstName,
+		writerLastName:  s.Share.Person.LastName,
+		writerIpiNum:    s.Share.Person.WriterIpiNum,
 
 		// publisherName:   publisher.Name,
 		// publisherIpiNum: publisher.IpiNum,
@@ -103,7 +106,7 @@ func (m MLC) writeMLC(file *excelize.File, sheet string, row int) error {
 	return nil
 }
 
-func MLCWrite(info []Info) (*bytes.Buffer, error) {
+func MLCWrite(songs []Song) (*bytes.Buffer, error) {
 	file := excelize.NewFile()
 	defer func() {
 		err := file.Close()
@@ -126,7 +129,7 @@ func MLCWrite(info []Info) (*bytes.Buffer, error) {
 
 	// write songs
 	row := 2 // offset for header (1 indexed)
-	for _, x := range info {
+	for _, x := range songs {
 		if x.Share.PubPercent == 0 {
 			continue
 		}

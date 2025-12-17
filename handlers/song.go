@@ -36,7 +36,7 @@ func FetchSongs(c *gin.Context, db *gorm.DB) {
 	}
 
 	var songs []models.Song
-	err := query.Find(&songs).Order("release_date DESC").Error
+	err := query.Preload("Share").Find(&songs).Order("release_date DESC").Error
 
 	if err != nil {
 		c.JSON(400, gin.H{"error": "could not find any songs"})

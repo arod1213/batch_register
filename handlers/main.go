@@ -9,7 +9,6 @@ import (
 
 	"github.com/arod1213/auto_ingestion/models"
 	"github.com/arod1213/auto_ingestion/spotify"
-	"github.com/arod1213/auto_ingestion/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -41,6 +40,12 @@ func FetchTracks(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	// init the share
+	for i := range songs {
+		share := models.Share{}
+		songs[i].Share = &share
+	}
+
 	go func() {
 		err := SaveSongs(db, songs) // async call
 		if err != nil {
@@ -60,7 +65,7 @@ func UpdateSongs(db *gorm.DB, songs []models.Song) error {
 }
 
 func WriteTracks(c *gin.Context, db *gorm.DB) {
-	var data []models.Info
+	var data []models.Song
 	err := c.ShouldBindBodyWithJSON(&data)
 	if err != nil {
 		fmt.Println("err is ", err.Error())
@@ -69,15 +74,24 @@ func WriteTracks(c *gin.Context, db *gorm.DB) {
 	}
 
 	go func() {
-		songs := utils.Map(data, func(info models.Info) models.Song {
-			s := info.Song
-			s.Registered = true
-			return s
-		})
-		err := SaveSongs(db, songs)
-		if err != nil {
-			log.Println("error saving songs")
+		tx := db.Begin()
+		for _, song := range data {
+			song.Registered = true
+
+			share := song.Share
+			share.SongIsrc = song.Isrc
+
+			err := tx.Where("isrc = ?", song.Isrc).Save(&song).Error
+			if err != nil {
+				tx.Rollback()
+			}
+
+			err = tx.Create(&share).Error
+			if err != nil {
+				tx.Rollback()
+			}
 		}
+		tx.Commit()
 	}()
 
 	buf := new(bytes.Buffer)
