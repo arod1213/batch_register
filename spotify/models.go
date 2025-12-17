@@ -65,6 +65,7 @@ func (a album) updateSong(s *models.Song) {
 }
 
 type track struct {
+	ID           string       `json:"id"`
 	Album        trackAlbum   `json:"album"`
 	Artists      []artist     `json:"artists"`
 	Name         string       `json:"name"`

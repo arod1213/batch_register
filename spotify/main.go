@@ -26,7 +26,7 @@ func AlbumToTracks(id string) []models.Song {
 	var mu sync.Mutex
 
 	fmt.Println("found items of", len(a.Tracks.Items))
-	tracksInfo, err := getAlbumTracks(id, auth)
+	tracksInfo, err := getAlbumTracks(id, auth, true)
 	if err != nil {
 		return x
 	}
@@ -73,7 +73,7 @@ func ArtistToTracks(id string) []models.Song {
 			continue
 		}
 		go func() {
-			tracksInfo, err := getAlbumTracks(item.Id, auth)
+			tracksInfo, err := getAlbumTracks(item.Id, auth, false)
 			if err != nil {
 				log.Println("album tracks error: ", err.Error())
 				return
