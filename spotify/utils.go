@@ -65,5 +65,7 @@ func fetchBody(endpoint string, accessToken string, requestType string) ([]byte,
 		fmt.Println("Read error:", err)
 		return nil, err
 	}
+
+	fmt.Println("responded with ", string(body))
 	return body, err
 }

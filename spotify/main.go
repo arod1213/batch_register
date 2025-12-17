@@ -25,12 +25,18 @@ func AlbumToTracks(id string) []models.Song {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 
-	for _, item := range a.Tracks.Items {
+	fmt.Println("found items of", len(a.Tracks.Items))
+	tracksInfo, err := getAlbumTracks(id, auth)
+	if err != nil {
+		return x
+	}
+
+	for _, item := range tracksInfo.Tracks {
 		i := item
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			song := i.Track.toSong()
+			song := i.toSong()
 			a.updateSong(&song)
 
 			mu.Lock()
@@ -61,14 +67,19 @@ func ArtistToTracks(id string) []models.Song {
 
 	for _, item := range a.Items {
 		wg.Add(1)
+
+		a, err := getAlbumById(item.Id, auth)
+		if err != nil {
+			continue
+		}
 		go func() {
-			a, err := getAlbumById(item.Id, auth)
+			tracksInfo, err := getAlbumTracks(item.Id, auth)
 			if err != nil {
 				log.Println("album tracks error: ", err.Error())
 				return
 			}
-			for _, item := range a.Tracks.Items {
-				song := item.Track.toSong()
+			for _, item := range tracksInfo.Tracks {
+				song := item.toSong()
 				a.updateSong(&song)
 
 				mu.Lock()
@@ -104,7 +115,6 @@ func PlaylistToTracks(playlist string) []models.Song {
 			album, err := getAlbum(t.Track.Album.Href, auth)
 			if err != nil {
 				fmt.Println("err is ", err)
-				x = append(x, song)
 				return
 			}
 			album.updateSong(&song)

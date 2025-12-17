@@ -24,9 +24,11 @@ func FetchTracks(c *gin.Context, db *gorm.DB) {
 	case "artist":
 		songs = spotify.ArtistToTracks(id)
 	case "album":
+		fmt.Println("searching album ", id)
 		songs = spotify.AlbumToTracks(id)
 	case "playlist":
 		songs = spotify.PlaylistToTracks(id)
+		fmt.Println("found ", len(songs))
 	default:
 		songs = spotify.PlaylistToTracks(id)
 	}
