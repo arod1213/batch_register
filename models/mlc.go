@@ -36,7 +36,8 @@ type MLC struct {
 	recordingLabel      string
 }
 
-func fromInfo(s Song) MLC {
+func fromInfo(share Share) MLC {
+	s := share.Song
 	var iswc string
 	if s.Iswc != nil {
 		iswc = *s.Iswc
@@ -45,7 +46,7 @@ func fromInfo(s Song) MLC {
 	return MLC{
 		iswc:            iswc,
 		title:           s.Title,
-		collectionShare: s.Share.PubPercent,
+		collectionShare: share.PubPercent,
 
 		recordingTitle:      s.Title,
 		recordingArtistName: s.Artist,
@@ -54,9 +55,9 @@ func fromInfo(s Song) MLC {
 
 		admin: nil,
 
-		writerFirstName: s.Share.Person.FirstName,
-		writerLastName:  s.Share.Person.LastName,
-		writerIpiNum:    s.Share.Person.WriterIpiNum,
+		writerFirstName: share.User.FirstName,
+		writerLastName:  share.User.LastName,
+		writerIpiNum:    share.User.WriterIpi,
 
 		// publisherName:   publisher.Name,
 		// publisherIpiNum: publisher.IpiNum,
@@ -106,7 +107,7 @@ func (m MLC) writeMLC(file *excelize.File, sheet string, row int) error {
 	return nil
 }
 
-func MLCWrite(songs []Song) (*bytes.Buffer, error) {
+func MLCWrite(shares []Share) (*bytes.Buffer, error) {
 	file := excelize.NewFile()
 	defer func() {
 		err := file.Close()
@@ -129,8 +130,8 @@ func MLCWrite(songs []Song) (*bytes.Buffer, error) {
 
 	// write songs
 	row := 2 // offset for header (1 indexed)
-	for _, x := range songs {
-		if x.Share.PubPercent == 0 {
+	for _, x := range shares {
+		if x.PubPercent == 0 {
 			continue
 		}
 

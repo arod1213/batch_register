@@ -7,14 +7,26 @@ import (
 	"log"
 	"slices"
 
+	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/models"
 	"github.com/arod1213/auto_ingestion/spotify"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func FetchTracks(c *gin.Context, db *gorm.DB) {
+	log.Println("FetchTracks - All keys:", c.Keys)
 	var songs []models.Song
+
+	userID, err := middleware.GetUserID(c)
+	if err != nil {
+		fmt.Println("COULD NOT GET USER ID", err.Error())
+		c.JSON(401, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	fmt.Println("USER IS ", userID)
 
 	id := c.Param("id")
 	method := c.Query("method")
@@ -36,37 +48,46 @@ func FetchTracks(c *gin.Context, db *gorm.DB) {
 		return y.ReleaseDate.Compare(x.ReleaseDate)
 	})
 	if len(songs) == 0 {
+		fmt.Println("COULD NOT GET LINK")
 		c.JSON(400, gin.H{"error": "no songs found: ensure your playlist is public"})
 		return
 	}
 
-	// init the share
-	for i := range songs {
-		share := models.Share{}
-		songs[i].Share = &share
+	tx := db.Begin()
+
+	err = tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&songs).Error
+	if err != nil {
+		log.Println("error saving songs")
+		tx.Rollback()
+		c.JSON(400, gin.H{"error": "failed to save songs"})
+		return
 	}
 
-	go func() {
-		err := SaveSongs(db, songs) // async call
-		if err != nil {
-			log.Println("error saving songs")
-		}
-	}()
+	shares := make([]models.Share, len(songs))
+	for i, song := range songs {
+		shares[i].SongID = song.ID
+		shares[i].UserID = userID
+	}
 
-	c.JSON(200, gin.H{"data": songs})
-}
+	err = tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&shares).Error
+	if err != nil {
+		log.Println("error saving shares")
+		tx.Rollback()
+		c.JSON(400, gin.H{"error": "failed to save shares"})
+		return
+	}
 
-func SaveSongs(db *gorm.DB, songs []models.Song) error {
-	return db.Save(&songs).Error
+	tx.Commit()
+	c.JSON(200, gin.H{"data": shares})
 }
 
 func UpdateSongs(db *gorm.DB, songs []models.Song) error {
 	return db.Save(&songs).Error
 }
 
-func WriteTracks(c *gin.Context, db *gorm.DB) {
-	var data []models.Song
-	err := c.ShouldBindBodyWithJSON(&data)
+func WriteShares(c *gin.Context, db *gorm.DB) {
+	var shares []models.Share
+	err := c.ShouldBindBodyWithJSON(&shares)
 	if err != nil {
 		fmt.Println("err is ", err.Error())
 		c.JSON(400, gin.H{"err": err.Error()})
@@ -75,21 +96,18 @@ func WriteTracks(c *gin.Context, db *gorm.DB) {
 
 	go func() {
 		tx := db.Begin()
-		for _, song := range data {
-			song.Registered = true
+		for _, share := range shares {
+			share.Song.Registered = true
 
-			share := song.Share
-			share.SongIsrc = song.Isrc
-
-			err := tx.Save(&song).Error
+			err := tx.Save(&share).Error
 			if err != nil {
 				tx.Rollback()
 			}
 
-			err = tx.Create(&share).Error
-			if err != nil {
-				tx.Rollback()
-			}
+			// err = tx.Create(&share).Error
+			// if err != nil {
+			// 	tx.Rollback()
+			// }
 		}
 		tx.Commit()
 	}()
@@ -98,13 +116,13 @@ func WriteTracks(c *gin.Context, db *gorm.DB) {
 	zipWriter := zip.NewWriter(buf)
 	count := 0
 
-	mlcFile, err := models.MLCWrite(data)
+	mlcFile, err := models.MLCWrite(shares)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	sxFile, err := models.SXWrite(data)
+	sxFile, err := models.SXWrite(shares)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

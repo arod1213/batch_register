@@ -47,35 +47,36 @@ type SX struct {
 	releaseLabel              string
 }
 
-func sxFromInfo(s Song) SX {
-	hours := int(s.Duration.Hours())
-	minutes := int(s.Duration.Minutes())
-	seconds := int(s.Duration.Seconds()) % 60
+func sxFromShare(s Share) SX {
+	song := s.Song
+	hours := int(song.Duration.Hours())
+	minutes := int(song.Duration.Minutes())
+	seconds := int(song.Duration.Seconds()) % 60
 	duration := fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 
 	var iswc string
-	if s.Iswc != nil {
-		iswc = *s.Iswc
+	if song.Iswc != nil {
+		iswc = *song.Iswc
 	}
 
 	return SX{
 		duration:     duration,
 		claimBasis:   CO,
-		claimPercent: s.Share.MasterPercent,
+		claimPercent: s.MasterPercent,
 
-		collectionBeganDate: s.ReleaseDate,
-		dateOfFirstRelease:  &s.ReleaseDate, // this may need to change
-		releaseDate:         s.ReleaseDate,
+		collectionBeganDate: song.ReleaseDate,
+		dateOfFirstRelease:  &song.ReleaseDate, // this may need to change
+		releaseDate:         song.ReleaseDate,
 		collectionEndDate:   time.Date(9999, time.Month(12), 30, 0, 0, 0, 0, time.Now().Location()),
 
-		title:         s.Title,
-		releaseTitle:  s.Title,
-		artist:        s.Artist,
-		releaseArtist: s.Artist,
+		title:         song.Title,
+		releaseTitle:  song.Title,
+		artist:        song.Artist,
+		releaseArtist: song.Artist,
 		iswc:          iswc,
-		isrc:          s.Isrc,
-		upc:           s.Upc,
-		releaseLabel:  s.Label,
+		isrc:          song.Isrc,
+		upc:           song.Upc,
+		releaseLabel:  song.Label,
 	}
 }
 
@@ -127,7 +128,7 @@ func (s SX) writeSX(file *excelize.File, sheet string, row int) error {
 	return nil
 }
 
-func SXWrite(songs []Song) (*bytes.Buffer, error) {
+func SXWrite(shares []Share) (*bytes.Buffer, error) {
 	file := excelize.NewFile()
 	defer func() {
 		err := file.Close()
@@ -155,12 +156,12 @@ func SXWrite(songs []Song) (*bytes.Buffer, error) {
 	sxHeader(file, sheet)
 
 	row := 11 // offset (1 indexed)
-	for _, song := range songs {
-		if song.Share.MasterPercent == 0 {
+	for _, share := range shares {
+		if share.MasterPercent == 0 {
 			continue
 		}
 
-		s := sxFromInfo(song)
+		s := sxFromShare(share)
 		if err := s.writeSX(file, sheet, row); err != nil {
 			fmt.Println("err is ", err)
 			continue

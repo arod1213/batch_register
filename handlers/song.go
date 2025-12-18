@@ -4,39 +4,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
-
-func UpdateSong(c *gin.Context, db *gorm.DB) {
-	var song models.Song
-	err := c.ShouldBindBodyWithJSON(&song)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid body"})
-		return
-	}
-	tx := db.Begin()
-	if song.Share != nil {
-		song.Share.SongIsrc = song.Isrc
-		err = tx.Save(song.Share).Error
-		if err != nil {
-			tx.Rollback()
-			c.JSON(500, gin.H{"error": "failed to save"})
-			return
-		}
-	}
-
-	err = tx.Save(&song).Error
-	if err != nil {
-		tx.Rollback()
-		c.JSON(500, gin.H{"error": "failed to save"})
-		return
-	}
-
-	tx.Commit()
-	c.JSON(200, gin.H{"data": "saved song"})
-}
 
 func MarkRegistered(c *gin.Context, db *gorm.DB) {
 	isrc := c.Param("isrc")
@@ -50,30 +22,40 @@ func MarkRegistered(c *gin.Context, db *gorm.DB) {
 }
 
 func FetchSongs(c *gin.Context, db *gorm.DB) {
+	userID, err := middleware.GetUserID(c)
+	if err != nil {
+		c.JSON(401, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	title := c.Query("title")
 	state := c.Query("state")
 
-	query := db
+	query := db.Table("shares").
+		Select("shares.*").
+		Joins("INNER JOIN songs ON songs.id = shares.song_id").
+		Where("shares.user_id = ?", userID)
+
 	if title != "" {
 		str := "%" + title + "%"
 		log.Println("searching for title: ", title)
-		query = query.Where("title LIKE ? OR artist LIKE ?", str, str)
+		query = query.Where("songs.title LIKE ? OR songs.artist LIKE ?", str, str)
 	}
 
 	if state == "" {
-		query = query.Where("registered = FALSE")
+		query = query.Where("songs.registered = FALSE")
 	} else {
-		query = query.Where("registered = TRUE")
+		query = query.Where("songs.registered = TRUE")
 	}
 
-	var songs []models.Song
-	err := query.Preload("Share").Find(&songs).Order("release_date DESC").Error
+	var shares []models.Share
+	err = query.Preload("Song").Find(&shares).Error
 
 	if err != nil {
 		c.JSON(400, gin.H{"error": "could not find any songs"})
 		return
 	}
-	c.JSON(200, gin.H{"data": songs})
+	c.JSON(200, gin.H{"data": shares})
 }
 
 func DeleteSongs(c *gin.Context, db *gorm.DB) {

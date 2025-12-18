@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/arod1213/auto_ingestion/database"
 	"github.com/arod1213/auto_ingestion/handlers"
+	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -39,13 +41,19 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	// AUTH
+	r.POST("/signup", handlers.Signup(db))
+	r.POST("/login", handlers.Login(db))
+
 	// SIMPLE CRUD
-	r.GET("/songs", func(c *gin.Context) {
+	r.GET("/songs", middleware.Auth(), func(c *gin.Context) {
 		handlers.FetchSongs(c, db)
 	})
-	r.PUT("/song", func(c *gin.Context) {
-		handlers.UpdateSong(c, db)
+
+	r.PUT("/share/:id", func(c *gin.Context) {
+		handlers.SaveShare(c, db)
 	})
+
 	r.DELETE("/songs", func(c *gin.Context) {
 		handlers.DeleteSongs(c, db)
 	})
@@ -54,13 +62,14 @@ func main() {
 	})
 
 	// SPOTIFY CALLS
-	r.GET("/read/:id", func(c *gin.Context) {
+	r.GET("/read/:id", middleware.Auth(), func(c *gin.Context) {
+		log.Println("Router - All keys:", c.Keys)
 		handlers.FetchTracks(c, db)
 	})
 
 	// EXCEL GENERATION
 	r.POST("/write", func(c *gin.Context) {
-		handlers.WriteTracks(c, db)
+		handlers.WriteShares(c, db)
 	})
 
 	err = http.ListenAndServe(":8080", r.Handler())
