@@ -48,7 +48,9 @@ type Song struct {
 	Isrc string  `gorm:"type:varchar(15);uniqueIndex;not null"`
 	Upc  uint64  `gorm:"type:integer;not null"`
 
-	Url         string        `gorm:"type:text"`
+	Url   string  `gorm:"type:text;not null"`
+	Image *string `gorm:"type:text"`
+
 	ReleaseDate time.Time     `gorm:"type:date"`
 	Duration    time.Duration `gorm:"-"`
 	Registered  bool          `gorm:"type:integer;default:0"`

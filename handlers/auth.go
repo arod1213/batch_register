@@ -13,8 +13,8 @@ import (
 )
 
 type LoginInfo struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string
+	Password string
 }
 
 type TokenInfo struct {
@@ -72,9 +72,20 @@ func Login(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+type SignupInfo struct {
+	Username string
+	Password string
+
+	FirstName string
+	LastName  string
+
+	WriterIpi uint64
+	PubIpi    uint64
+}
+
 func Signup(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var info LoginInfo
+		var info SignupInfo
 		err := c.ShouldBindJSON(&info)
 		if err != nil {
 			c.AbortWithStatusJSON(400, gin.H{"error": "bad request"})
@@ -91,7 +102,14 @@ func Signup(db *gorm.DB) gin.HandlerFunc {
 		user := models.User{
 			Username: info.Username,
 			Password: string(hashed),
+
+			FirstName: info.FirstName,
+			LastName:  info.LastName,
+
+			WriterIpi: info.WriterIpi,
+			PubIpi:    info.PubIpi,
 		}
+
 		tx := db.Begin()
 		err = tx.Create(&user).Error
 		if err != nil {

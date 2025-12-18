@@ -44,11 +44,26 @@ type trackAlbum struct {
 	Href string `json:"href"`
 }
 
+// "images": [
+//       {
+//         "url": "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228",
+//         "height": 300,
+//         "width": 300
+//       }
+//     ],
+
+type albumImage struct {
+	Url string `json:"url"`
+	// Height: uint32 `j`
+	// Width: uint32
+}
+
 type album struct {
-	ExternalIds externalIDs `json:"external_ids"`
-	Label       string      `json:"label"`
-	ReleaseDate PartialDate `json:"release_date"`
-	Tracks      tracksInfo  `json:"tracks"`
+	ExternalIds externalIDs  `json:"external_ids"`
+	Label       string       `json:"label"`
+	ReleaseDate PartialDate  `json:"release_date"`
+	Tracks      tracksInfo   `json:"tracks"`
+	Images      []albumImage `json:"images"`
 }
 
 func (a album) updateSong(s *models.Song) {
@@ -59,6 +74,12 @@ func (a album) updateSong(s *models.Song) {
 			upc = x
 		}
 	}
+	// save image url
+	if len(a.Images) > 0 {
+		primary := a.Images[0]
+		s.Image = &primary.Url
+	}
+
 	s.ReleaseDate = a.ReleaseDate.Time
 	s.Upc = upc
 	s.Label = a.Label
