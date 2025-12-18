@@ -43,6 +43,8 @@ func fromInfo(share Share, user User) MLC {
 		iswc = *s.Iswc
 	}
 
+	fullName := fmt.Sprintf("%s %s", user.FirstName, user.LastName)
+
 	return MLC{
 		iswc:            iswc,
 		title:           s.Title,
@@ -59,9 +61,9 @@ func fromInfo(share Share, user User) MLC {
 		writerLastName:  user.LastName,
 		writerIpiNum:    user.WriterIpi,
 
-		// publisherName:   publisher.Name,
-		// publisherIpiNum: publisher.IpiNum,
-		writerRoleCode: "CA", // change this
+		publisherName:   fullName,
+		publisherIpiNum: user.PubIpi,
+		writerRoleCode:  "CA", // change this
 	}
 }
 
