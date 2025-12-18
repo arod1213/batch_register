@@ -10,6 +10,7 @@ import (
 	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/models"
 	"github.com/arod1213/auto_ingestion/spotify"
+	"github.com/arod1213/auto_ingestion/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -21,12 +22,9 @@ func FetchTracks(c *gin.Context, db *gorm.DB) {
 
 	userID, err := middleware.GetUserID(c)
 	if err != nil {
-		fmt.Println("COULD NOT GET USER ID", err.Error())
 		c.JSON(401, gin.H{"error": "unauthorized"})
 		return
 	}
-
-	fmt.Println("USER IS ", userID)
 
 	id := c.Param("id")
 	method := c.Query("method")
@@ -35,11 +33,9 @@ func FetchTracks(c *gin.Context, db *gorm.DB) {
 	case "artist":
 		songs = spotify.ArtistToTracks(id)
 	case "album":
-		fmt.Println("searching album ", id)
 		songs = spotify.AlbumToTracks(id)
 	case "playlist":
 		songs = spotify.PlaylistToTracks(id)
-		fmt.Println("found ", len(songs))
 	default:
 		songs = spotify.PlaylistToTracks(id)
 	}
@@ -47,8 +43,8 @@ func FetchTracks(c *gin.Context, db *gorm.DB) {
 	slices.SortFunc(songs, func(x models.Song, y models.Song) int {
 		return y.ReleaseDate.Compare(x.ReleaseDate)
 	})
+
 	if len(songs) == 0 {
-		fmt.Println("COULD NOT GET LINK")
 		c.JSON(400, gin.H{"error": "no songs found: ensure your playlist is public"})
 		return
 	}
@@ -63,8 +59,21 @@ func FetchTracks(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	isrcs := utils.Map(songs, func(s models.Song) string {
+		return s.Isrc
+	})
+
+	var insertedSongs []models.Song
+	err = tx.Where("isrc IN ?", isrcs).Find(&insertedSongs).Error
+	if err != nil {
+		log.Println("error saving songs")
+		tx.Rollback()
+		c.JSON(400, gin.H{"error": "failed to save songs"})
+		return
+	}
+
 	shares := make([]models.Share, len(songs))
-	for i, song := range songs {
+	for i, song := range insertedSongs {
 		shares[i].SongID = song.ID
 		shares[i].UserID = userID
 	}

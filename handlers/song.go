@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/models"
@@ -38,7 +37,6 @@ func FetchSongs(c *gin.Context, db *gorm.DB) {
 
 	if title != "" {
 		str := "%" + title + "%"
-		log.Println("searching for title: ", title)
 		query = query.Where("songs.title LIKE ? OR songs.artist LIKE ?", str, str)
 	}
 

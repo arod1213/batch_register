@@ -44,18 +44,8 @@ type trackAlbum struct {
 	Href string `json:"href"`
 }
 
-// "images": [
-//       {
-//         "url": "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228",
-//         "height": 300,
-//         "width": 300
-//       }
-//     ],
-
 type albumImage struct {
 	Url string `json:"url"`
-	// Height: uint32 `j`
-	// Width: uint32
 }
 
 type album struct {
