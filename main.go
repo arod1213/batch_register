@@ -68,7 +68,7 @@ func main() {
 	})
 
 	// EXCEL GENERATION
-	r.POST("/write", func(c *gin.Context) {
+	r.POST("/write", middleware.Auth(), func(c *gin.Context) {
 		handlers.WriteShares(c, db)
 	})
 

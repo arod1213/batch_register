@@ -36,7 +36,7 @@ type MLC struct {
 	recordingLabel      string
 }
 
-func fromInfo(share Share) MLC {
+func fromInfo(share Share, user User) MLC {
 	s := share.Song
 	var iswc string
 	if s.Iswc != nil {
@@ -55,9 +55,9 @@ func fromInfo(share Share) MLC {
 
 		admin: nil,
 
-		writerFirstName: share.User.FirstName,
-		writerLastName:  share.User.LastName,
-		writerIpiNum:    share.User.WriterIpi,
+		writerFirstName: user.FirstName,
+		writerLastName:  user.LastName,
+		writerIpiNum:    user.WriterIpi,
 
 		// publisherName:   publisher.Name,
 		// publisherIpiNum: publisher.IpiNum,
@@ -107,7 +107,7 @@ func (m MLC) writeMLC(file *excelize.File, sheet string, row int) error {
 	return nil
 }
 
-func MLCWrite(shares []Share) (*bytes.Buffer, error) {
+func MLCWrite(shares []Share, user User) (*bytes.Buffer, error) {
 	file := excelize.NewFile()
 	defer func() {
 		err := file.Close()
@@ -135,7 +135,7 @@ func MLCWrite(shares []Share) (*bytes.Buffer, error) {
 			continue
 		}
 
-		m := fromInfo(x)
+		m := fromInfo(x, user)
 		if err := m.writeMLC(file, sheet, row); err != nil {
 			fmt.Println("err is ", err)
 			continue

@@ -103,6 +103,12 @@ func WriteShares(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	user, err := middleware.GetUser(c, db)
+	if err != nil {
+		c.JSON(401, gin.H{"err": "unauthorized"})
+		return
+	}
+
 	go func() {
 		tx := db.Begin()
 		for _, share := range shares {
@@ -125,7 +131,7 @@ func WriteShares(c *gin.Context, db *gorm.DB) {
 	zipWriter := zip.NewWriter(buf)
 	count := 0
 
-	mlcFile, err := models.MLCWrite(shares)
+	mlcFile, err := models.MLCWrite(shares, *user)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
