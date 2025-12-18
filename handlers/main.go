@@ -114,15 +114,12 @@ func WriteShares(c *gin.Context, db *gorm.DB) {
 		for _, share := range shares {
 			share.Song.Registered = true
 
-			err := tx.Save(&share).Error
+			err := tx.Save(&share.Song).Error
 			if err != nil {
+				fmt.Println("err is ", err.Error())
 				tx.Rollback()
+				return
 			}
-
-			// err = tx.Create(&share).Error
-			// if err != nil {
-			// 	tx.Rollback()
-			// }
 		}
 		tx.Commit()
 	}()
