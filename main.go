@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -46,31 +45,22 @@ func main() {
 	r.POST("/login", handlers.Login(db))
 
 	// SIMPLE CRUD
-	r.GET("/songs", middleware.Auth(), func(c *gin.Context) {
-		handlers.FetchSongs(c, db)
-	})
+	r.GET("/songs", middleware.Auth(), handlers.FetchSongs(db))
+	r.POST("/songs", middleware.Auth(), handlers.SaveTracks(db)) // create songs
 
-	r.PUT("/share/:id", func(c *gin.Context) {
-		handlers.SaveShare(c, db)
-	})
+	r.GET("/user", middleware.Auth(), handlers.GetMe(db))
+	r.PUT("/user/:id", handlers.UpdateUser(db))
 
-	r.DELETE("/songs", func(c *gin.Context) {
-		handlers.DeleteSongs(c, db)
-	})
-	r.POST("/register/:isrc", func(c *gin.Context) {
-		handlers.MarkRegistered(c, db)
-	})
-
-	// SPOTIFY CALLS
-	r.GET("/read/:id", middleware.Auth(), func(c *gin.Context) {
-		log.Println("Router - All keys:", c.Keys)
-		handlers.FetchTracks(c, db)
-	})
+	// r.DELETE("/songs", handlers.DeleteSongs(db))
+	r.PUT("/share/:id", handlers.SaveShare(db))
+	r.POST("/register/:isrc", handlers.MarkRegistered(db))
 
 	// EXCEL GENERATION
-	r.POST("/write", middleware.Auth(), func(c *gin.Context) {
-		handlers.WriteShares(c, db)
-	})
+	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db))
+
+	// SPOTIFY CALLS
+	r.GET("/read/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db))
+	r.GET("/read/preview/:id", handlers.FetchTracks())
 
 	err = http.ListenAndServe(":8080", r.Handler())
 	if err != nil {
