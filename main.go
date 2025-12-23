@@ -48,13 +48,14 @@ func main() {
 	r.GET("/user", middleware.Auth(), handlers.GetMe(db)) // user profile info
 	r.PUT("/user/:id", handlers.UpdateUser(db))           // update user profile
 
+	r.GET("/song/:songID", middleware.Auth(), handlers.GetSong(db))
 	r.GET("/songs", middleware.Auth(), handlers.FetchSongs(db))  // fetch user songs
 	r.POST("/songs", middleware.Auth(), handlers.SaveTracks(db)) // create songs
 	r.DELETE("/shares", handlers.DeleteShares(db))               // provide list of song ids in body
 	r.PUT("/share/:id", handlers.SaveShare(db))                  // update share
 	r.POST("/register/:isrc", handlers.MarkRegistered(db))       // mark registered
 
-	r.POST("/payments", handlers.SaveRoyalties(db))                         // insert new payments
+	r.POST("/payments", middleware.Auth(), handlers.SaveRoyalties(db))      // insert new payments
 	r.GET("/payments/:songID", middleware.Auth(), handlers.GetPayments(db)) // read payments for song by user
 
 	// EXCEL GENERATION

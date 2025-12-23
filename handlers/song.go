@@ -2,12 +2,69 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/models"
+	"github.com/arod1213/auto_ingestion/royalties"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+type SongInfo struct {
+	Song     models.Song
+	Share    models.Share
+	Payments []royalties.Payment
+}
+
+func GetSong(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserID(c)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "unauthorized"})
+			return
+		}
+		idStr := c.Param("songID")
+		songID, err := strconv.ParseUint(idStr, 10, 32)
+		if err != nil {
+			c.JSON(400, gin.H{"error": "bad request"})
+			return
+		}
+
+		var song models.Song
+		if err := db.
+			Joins("JOIN shares ON shares.song_id = songs.id").
+			Where("songs.id = ? AND shares.user_id = ?", uint(songID), userID).
+			First(&song).Error; err != nil {
+			c.JSON(404, gin.H{"error": "not found"})
+			return
+		}
+
+		var share models.Share
+		if err := db.
+			Where("song_id = ? AND user_id = ?", song.ID, userID).
+			First(&share).Error; err != nil {
+			c.JSON(404, gin.H{"error": "share not found"})
+			return
+		}
+
+		var payments []royalties.Payment
+		if err := db.
+			Where("song_id = ?", song.ID).
+			Find(&payments).Error; err != nil {
+			c.JSON(400, gin.H{"error": "failed to load payments"})
+			return
+		}
+
+		info := SongInfo{
+			Song:     song,
+			Share:    share,
+			Payments: payments,
+		}
+
+		c.JSON(200, gin.H{"data": info})
+	}
+}
 
 func MarkRegistered(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
