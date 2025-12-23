@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/arod1213/auto_ingestion/models"
+	"github.com/arod1213/auto_ingestion/royalties"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -13,7 +14,7 @@ func Setup() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&models.Song{}, &models.Share{}, &models.User{})
+	err = db.AutoMigrate(&models.Song{}, &models.Share{}, &models.User{}, &royalties.Payment{})
 	if err != nil {
 		return nil, err
 	}

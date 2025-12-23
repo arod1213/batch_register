@@ -45,22 +45,24 @@ func main() {
 	r.POST("/login", handlers.Login(db))
 
 	// SIMPLE CRUD
-	r.GET("/songs", middleware.Auth(), handlers.FetchSongs(db))
+	r.GET("/user", middleware.Auth(), handlers.GetMe(db)) // user profile info
+	r.PUT("/user/:id", handlers.UpdateUser(db))           // update user profile
+
+	r.GET("/songs", middleware.Auth(), handlers.FetchSongs(db))  // fetch user songs
 	r.POST("/songs", middleware.Auth(), handlers.SaveTracks(db)) // create songs
+	r.DELETE("/shares", handlers.DeleteShares(db))               // provide list of song ids in body
+	r.PUT("/share/:id", handlers.SaveShare(db))                  // update share
+	r.POST("/register/:isrc", handlers.MarkRegistered(db))       // mark registered
 
-	r.GET("/user", middleware.Auth(), handlers.GetMe(db))
-	r.PUT("/user/:id", handlers.UpdateUser(db))
-
-	// r.DELETE("/songs", handlers.DeleteSongs(db))
-	r.PUT("/share/:id", handlers.SaveShare(db))
-	r.POST("/register/:isrc", handlers.MarkRegistered(db))
+	r.POST("/payments", handlers.SaveRoyalties(db))                         // insert new payments
+	r.GET("/payments/:songID", middleware.Auth(), handlers.GetPayments(db)) // read payments for song by user
 
 	// EXCEL GENERATION
-	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db))
+	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db)) // download excel
 
 	// SPOTIFY CALLS
-	r.GET("/read/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db))
-	r.GET("/read/preview/:id", handlers.FetchTracks())
+	r.GET("/read/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db)) // import spotify catalog
+	r.GET("/read/preview/:id", handlers.FetchTracks())                     // preview spotify catalog
 
 	err = http.ListenAndServe(":8080", r.Handler())
 	if err != nil {

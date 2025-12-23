@@ -60,21 +60,32 @@ func FetchSongs(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func DeleteSongs(db *gorm.DB) gin.HandlerFunc {
+func DeleteShares(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var ids []uint
-		err := c.ShouldBindJSON(&ids)
+		userID, err := middleware.GetUserID(c)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		var songIDs []uint
+		err = c.ShouldBindJSON(&songIDs)
 		if err != nil {
 			c.JSON(400, gin.H{"error": "bad request"})
 			return
 		}
 
-		err = db.Where("id IN ?", ids).Delete(&models.Song{}).Error
+		err = db.
+			Joins("LEFT JOIN songs on songs.id = shares.song_id").
+			Where("songs.id IN ? AND shares.user_id = ?", songIDs, userID).
+			Delete(&models.Share{}).
+			Error
+
 		if err != nil {
-			c.JSON(400, gin.H{"error": "failed to delete songs"})
+			c.JSON(400, gin.H{"error": "failed to delete shares"})
 			return
 		}
 
-		c.JSON(200, gin.H{"data": "successfully deleted songs"})
+		c.JSON(200, gin.H{"data": "successfully deleted shares"})
 	}
 }
