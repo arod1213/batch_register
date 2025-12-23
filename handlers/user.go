@@ -42,7 +42,6 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		if user.ID != uint(userID) {
-			fmt.Println("id err is ", err.Error())
 			c.JSON(400, gin.H{"error": "bad request"})
 			return
 		}
