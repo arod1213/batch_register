@@ -33,11 +33,6 @@ func (s Society) ToCode() string {
 	panic("unreachable - fell through switch")
 }
 
-type UserSong struct {
-	Song  Song
-	Share Share
-}
-
 type Song struct {
 	ID     uint   `gorm:"primaryKey;autoIncrement"`
 	Title  string `gorm:"type:varchar(255);not null"`

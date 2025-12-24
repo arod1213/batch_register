@@ -50,7 +50,8 @@ func GetSong(db *gorm.DB) gin.HandlerFunc {
 
 		var payments []royalties.Payment
 		if err := db.
-			Where("song_id = ?", song.ID).
+			Joins("LEFT JOIN shares on shares.id = payments.share_id").
+			Where("shares.song_id = ?", song.ID).
 			Find(&payments).Error; err != nil {
 			c.JSON(400, gin.H{"error": "failed to load payments"})
 			return

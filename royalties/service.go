@@ -5,12 +5,13 @@ import (
 
 	"github.com/arod1213/auto_ingestion/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
-func (p ExtPayment) ToPayment(songID *uint, userID uint) Payment {
+func (p ExtPayment) ToPayment(shareID *uint) Payment {
 	return Payment{
-		UserID:   userID,
-		SongID:   songID,
+		Hash:     p.Hash,
+		ShareID:  shareID,
 		Earnings: p.Earnings,
 		Payor:    p.Payor.Name,
 		// Date:      p.Date,
@@ -29,7 +30,7 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) error {
 		}
 		payments = append(payments, *payment)
 		if len(payments) >= 1000 {
-			err := db.Save(&payments).Error
+			err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
 			if err != nil {
 				log.Println("failed to save payments", err.Error())
 				return err
@@ -47,40 +48,50 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) error {
 }
 
 func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint) (*Payment, error) {
-	var song models.Song
+	var share models.Share
 
 	if p.Isrc != nil {
 		if v, ok := cache[*p.Isrc]; ok {
-			payment := p.ToPayment(&v, userID)
+			payment := p.ToPayment(&v)
 			return &payment, nil
 		}
 
-		err := db.Where("isrc = ?", *p.Isrc).First(&song).Error
+		err := db.
+			Joins("songs on songs.id = shares.song_id").
+			Where("songs.isrc = ?", *p.Isrc).
+			First(&share).
+			Error
+
 		if err != nil {
 			return nil, err
 		}
 
-		cache[*p.Isrc] = song.ID
+		cache[*p.Isrc] = share.ID
 	} else if p.Iswc != nil {
 		if v, ok := cache[*p.Iswc]; ok {
-			payment := p.ToPayment(&v, userID)
+			payment := p.ToPayment(&v)
 			return &payment, nil
 		}
 
-		err := db.Where("iswc = ?", *p.Iswc).First(&song).Error
+		err := db.
+			Joins("songs on songs.id = shares.song_id").
+			Where("songs.iswc = ?", *p.Iswc).
+			First(&share).
+			Error
+
 		if err != nil {
 			return nil, err
 		}
 
-		cache[*p.Iswc] = song.ID
+		cache[*p.Iswc] = share.ID
 	} else {
 		if v, ok := cache[p.Title]; ok {
-			payment := p.ToPayment(&v, userID)
+			payment := p.ToPayment(&v)
 			return &payment, nil
 		}
 
 		query := db.
-			Joins("LEFT JOIN shares on shares.song_id = songs.id").
+			Joins("LEFT JOIN songs on shares.song_id = songs.id").
 			Where("songs.title LIKE ?", "%"+p.Title+"%")
 
 		if p.Artist != nil {
@@ -89,18 +100,18 @@ func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint)
 
 		err := query.
 			Where("shares.user_id = ?", userID).
-			First(&song).
+			First(&share).
 			Error
 
 		if err != nil {
 			return nil, err
 		}
-		cache[p.Title] = song.ID
+		cache[p.Title] = share.ID
 	}
 
-	payment := p.ToPayment(&song.ID, userID)
-	if song.ID == 0 {
-		payment.SongID = nil
+	payment := p.ToPayment(&share.ID)
+	if share.ID == 0 {
+		payment.ShareID = nil
 	}
 
 	return &payment, nil
