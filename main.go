@@ -55,9 +55,9 @@ func main() {
 	r.PUT("/share/:id", handlers.SaveShare(db))                       // update share for user
 	// r.POST("/register/:isrc", handlers.MarkRegistered(db))            // mark registered
 
-	r.POST("/payments/scan", middleware.Auth(), handlers.RescanPayments(db)) // insert new payments
-	r.POST("/payments", middleware.Auth(), handlers.SaveRoyalties(db))       // insert new payments
-	r.GET("/payments/:songID", middleware.Auth(), handlers.GetPayments(db))  // read payments for song by user
+	r.POST("/payments/scan", middleware.Auth(), handlers.RescanPayments(db))     // insert new payments
+	r.POST("/payments", middleware.Auth(), handlers.SaveRoyalties(db))           // insert new payments
+	r.GET("/payments/song/:songID", middleware.Auth(), handlers.GetPayments(db)) // read payments for song by user
 
 	// EXCEL GENERATION
 	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db)) // download excel

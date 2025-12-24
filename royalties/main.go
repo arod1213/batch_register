@@ -16,10 +16,11 @@ import (
 )
 
 type Payment struct {
-	ID   uint   `gorm:"primaryKey;autoIncrement"`
-	Hash string `gorm:"type:text;not null;index:idx_hash_share,unique"`
+	ID uint `gorm:"primaryKey;autoIncrement"`
+	// Hash string `gorm:"type:text;not null;index:idx_hash_share,unique"`
+	Hash string `gorm:"type:text";not null`
 
-	Data ExtPayment `gorm:"type:jsonb"`
+	Data ExtPayment `gorm:"type:jsonb;serializer:json"`
 
 	Earnings  float64    `gorm:"type:real;not null"`
 	Payor     string     `gorm:"type:text;not null"`
@@ -29,6 +30,7 @@ type Payment struct {
 	SongID *uint       `gorm:"type:varchar(15)"`
 	Song   models.Song `gorm:"foreignKey:SongID;references:ID;constraint:OnDelete:CASCADE;"`
 
+	// UserID uint        `gorm:"type:varchar(15);not null;index:idx_hash_share,unique"`
 	UserID uint        `gorm:"type:varchar(15);not null"`
 	User   models.User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
 }

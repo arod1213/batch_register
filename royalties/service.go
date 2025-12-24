@@ -1,6 +1,7 @@
 package royalties
 
 import (
+	"errors"
 	"log"
 
 	"github.com/arod1213/auto_ingestion/models"
@@ -65,7 +66,7 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) error {
 		}
 	}
 
-	err := db.Save(&payments).Error
+	err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
 	if err != nil {
 		log.Println("failed to save payments", err.Error())
 		return err
@@ -75,6 +76,7 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) error {
 
 func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint) (*Payment, error) {
 	var song models.Song
+	var songID *uint
 
 	if p.Isrc != nil {
 		if v, ok := cache[*p.Isrc]; ok {
@@ -87,7 +89,10 @@ func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint)
 			First(&song).
 			Error
 
-		if err != nil {
+		if err == nil {
+			cache[*p.Isrc] = song.ID
+			songID = &song.ID
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
 
@@ -103,11 +108,12 @@ func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint)
 			First(&song).
 			Error
 
-		if err != nil {
+		if err == nil {
+			cache[*p.Iswc] = song.ID
+			songID = &song.ID
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
-
-		cache[*p.Iswc] = song.ID
 	} else {
 		if v, ok := cache[p.Title]; ok {
 			payment := p.ToPayment(&v, userID)
@@ -115,7 +121,7 @@ func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint)
 		}
 
 		query := db.
-			Joins("LEFT JOIN songs on shares.song_id = songs.id").
+			Joins("LEFT JOIN shares on shares.song_id = songs.id").
 			Where("songs.title LIKE ?", "%"+p.Title+"%")
 
 		if p.Artist != nil {
@@ -127,16 +133,14 @@ func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint)
 			First(&song).
 			Error
 
-		if err != nil {
+		if err == nil {
+			cache[p.Title] = song.ID
+			songID = &song.ID
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
-		cache[p.Title] = song.ID
 	}
 
-	payment := p.ToPayment(&song.ID, userID)
-	if song.ID == 0 {
-		payment.SongID = nil
-	}
-
+	payment := p.ToPayment(songID, userID)
 	return &payment, nil
 }
