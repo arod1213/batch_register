@@ -8,10 +8,11 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (p ExtPayment) ToPayment(shareID *uint) Payment {
+func (p ExtPayment) ToPayment(songID *uint, userID uint) Payment {
 	return Payment{
+		UserID:   userID,
+		SongID:   songID,
 		Hash:     p.Hash,
-		ShareID:  shareID,
 		Earnings: p.Earnings,
 		Payor:    p.Payor.Name,
 		// Date:      p.Date,
@@ -48,45 +49,43 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) error {
 }
 
 func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint) (*Payment, error) {
-	var share models.Share
+	var song models.Song
 
 	if p.Isrc != nil {
 		if v, ok := cache[*p.Isrc]; ok {
-			payment := p.ToPayment(&v)
+			payment := p.ToPayment(&v, userID)
 			return &payment, nil
 		}
 
 		err := db.
-			Joins("songs on songs.id = shares.song_id").
-			Where("songs.isrc = ?", *p.Isrc).
-			First(&share).
+			Where("isrc = ?", *p.Isrc).
+			First(&song).
 			Error
 
 		if err != nil {
 			return nil, err
 		}
 
-		cache[*p.Isrc] = share.ID
+		cache[*p.Isrc] = song.ID
 	} else if p.Iswc != nil {
 		if v, ok := cache[*p.Iswc]; ok {
-			payment := p.ToPayment(&v)
+			payment := p.ToPayment(&v, userID)
 			return &payment, nil
 		}
 
 		err := db.
-			Joins("songs on songs.id = shares.song_id").
-			Where("songs.iswc = ?", *p.Iswc).
-			First(&share).
+			Where("iswc = ?", *p.Iswc).
+			First(&song).
 			Error
 
 		if err != nil {
 			return nil, err
 		}
 
-		cache[*p.Iswc] = share.ID
+		cache[*p.Iswc] = song.ID
 	} else {
 		if v, ok := cache[p.Title]; ok {
-			payment := p.ToPayment(&v)
+			payment := p.ToPayment(&v, userID)
 			return &payment, nil
 		}
 
@@ -100,18 +99,18 @@ func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint)
 
 		err := query.
 			Where("shares.user_id = ?", userID).
-			First(&share).
+			First(&song).
 			Error
 
 		if err != nil {
 			return nil, err
 		}
-		cache[p.Title] = share.ID
+		cache[p.Title] = song.ID
 	}
 
-	payment := p.ToPayment(&share.ID)
-	if share.ID == 0 {
-		payment.ShareID = nil
+	payment := p.ToPayment(&song.ID, userID)
+	if song.ID == 0 {
+		payment.SongID = nil
 	}
 
 	return &payment, nil

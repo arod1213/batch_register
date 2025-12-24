@@ -24,8 +24,11 @@ type Payment struct {
 	Date      *time.Time `gorm:"-"`
 	Territory *string    `gorm:"type:text"`
 
-	ShareID *uint        `gorm:"type:varchar(15);index:idx_hash_share,unique"`
-	Share   models.Share `gorm:"foreignKey:ShareID;references:ID;constraint:OnDelete:CASCADE;"`
+	SongID *uint       `gorm:"type:varchar(15)"`
+	Song   models.Song `gorm:"foreignKey:SongID;references:ID;constraint:OnDelete:CASCADE;"`
+
+	UserID uint        `gorm:"type:varchar(15);not null"`
+	User   models.User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
 }
 
 type payor struct {
