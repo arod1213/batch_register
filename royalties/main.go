@@ -16,14 +16,15 @@ import (
 )
 
 type Payment struct {
-	ID        uint       `gorm:"primaryKey;autoIncrement"`
-	Hash      string     `gorm:"type:text;not null;unique"`
+	ID   uint   `gorm:"primaryKey;autoIncrement"`
+	Hash string `gorm:"type:text;not null;index:idx_hash_share,unique"`
+
 	Earnings  float64    `gorm:"type:real;not null"`
 	Payor     string     `gorm:"type:text;not null"`
 	Date      *time.Time `gorm:"-"`
 	Territory *string    `gorm:"type:text"`
 
-	ShareID *uint        `gorm:"type:varchar(15)"`
+	ShareID *uint        `gorm:"type:varchar(15);index:idx_hash_share,unique"`
 	Share   models.Share `gorm:"foreignKey:ShareID;references:ID;constraint:OnDelete:CASCADE;"`
 }
 
