@@ -15,6 +15,22 @@ import (
 	"gorm.io/gorm"
 )
 
+func RescanPayments(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserID(c)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "unauthorized"})
+			return
+		}
+		err = royalties.Reconcile(db, userID)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "failed to save"})
+			return
+		}
+		c.JSON(200, gin.H{"data": "success"})
+	}
+}
+
 func GetPayments(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, err := middleware.GetUserID(c)

@@ -8,8 +8,33 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+func Reconcile(db *gorm.DB, userID uint) error {
+	var payments []Payment
+	err := db.Where("song_id is NULL AND user_id = ?", userID).Find(&payments).Error
+	if err != nil {
+		return err
+	}
+
+	cache := make(map[string]uint)
+	for _, pay := range payments {
+		payment, err := pay.Data.FindPayment(db, userID, cache)
+		if err != nil {
+			continue
+		}
+
+		pay.SongID = payment.SongID
+		err = db.Save(&pay).Error
+		if err != nil {
+			log.Println("error saving payment")
+			continue
+		}
+	}
+	return nil
+}
+
 func (p ExtPayment) ToPayment(songID *uint, userID uint) Payment {
 	return Payment{
+		Data:     p,
 		UserID:   userID,
 		SongID:   songID,
 		Hash:     p.Hash,

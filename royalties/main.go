@@ -19,6 +19,8 @@ type Payment struct {
 	ID   uint   `gorm:"primaryKey;autoIncrement"`
 	Hash string `gorm:"type:text;not null;index:idx_hash_share,unique"`
 
+	Data ExtPayment `gorm:"type:jsonb"`
+
 	Earnings  float64    `gorm:"type:real;not null"`
 	Payor     string     `gorm:"type:text;not null"`
 	Date      *time.Time `gorm:"-"`
