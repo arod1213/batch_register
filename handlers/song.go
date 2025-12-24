@@ -7,14 +7,20 @@ import (
 	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/models"
 	"github.com/arod1213/auto_ingestion/royalties"
+	"github.com/arod1213/auto_ingestion/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
+type payInfo struct {
+	Total float64
+	Items []royalties.Payment
+}
+
 type SongInfo struct {
 	Song     models.Song
 	Share    models.Share
-	Payments []royalties.Payment
+	Payments payInfo
 }
 
 func GetSong(db *gorm.DB) gin.HandlerFunc {
@@ -57,10 +63,17 @@ func GetSong(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		total := utils.Reduce(payments, 0.0, func(acc float64, p royalties.Payment) float64 {
+			return acc + p.Earnings
+		})
+
 		info := SongInfo{
-			Song:     song,
-			Share:    share,
-			Payments: payments,
+			Song:  song,
+			Share: share,
+			Payments: payInfo{
+				Total: total,
+				Items: payments,
+			},
 		}
 
 		c.JSON(200, gin.H{"data": info})
