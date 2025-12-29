@@ -2,6 +2,7 @@ package models
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"time"
 
@@ -167,6 +168,9 @@ func SXWrite(shares []Share) (*bytes.Buffer, error) {
 			continue
 		}
 		row++
+	}
+	if row == 11 {
+		return nil, errors.New("no shares written")
 	}
 
 	return file.WriteToBuffer()

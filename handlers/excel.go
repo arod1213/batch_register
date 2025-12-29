@@ -47,42 +47,36 @@ func DownloadRegistrations(db *gorm.DB) gin.HandlerFunc {
 		count := 0
 
 		mlcFile, err := models.MLCWrite(shares, *user)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
+		if err == nil {
+			f2, err := zipWriter.Create("mlc.xlsx")
+			if err != nil {
+				c.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+
+			_, err = f2.Write(mlcFile.Bytes())
+			if err != nil {
+				c.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			count++
 		}
 
 		sxFile, err := models.SXWrite(shares)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
+		if err == nil {
+			f1, err := zipWriter.Create("sx.xlsx")
+			if err != nil {
+				c.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
 
-		f1, err := zipWriter.Create("sx.xlsx")
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
+			_, err = f1.Write(sxFile.Bytes())
+			if err != nil {
+				c.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			count++
 		}
-
-		_, err = f1.Write(sxFile.Bytes())
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
-		count++
-
-		f2, err := zipWriter.Create("mlc.xlsx")
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
-
-		_, err = f2.Write(mlcFile.Bytes())
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
-		count++
 
 		err = zipWriter.Close()
 		if err != nil {

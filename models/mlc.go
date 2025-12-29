@@ -2,6 +2,7 @@ package models
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/arod1213/auto_ingestion/excel"
@@ -143,6 +144,9 @@ func MLCWrite(shares []Share, user User) (*bytes.Buffer, error) {
 			continue
 		}
 		row++
+	}
+	if row == 2 {
+		return nil, errors.New("no shares written")
 	}
 
 	return file.WriteToBuffer()

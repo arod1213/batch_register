@@ -1,7 +1,11 @@
 package models
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Society string
@@ -43,16 +47,32 @@ type Song struct {
 	Isrc string  `gorm:"type:varchar(15);uniqueIndex;not null"`
 	Upc  uint64  `gorm:"type:integer;not null"`
 
-	Url   string  `gorm:"type:text;not null"`
+	SpotifyID string `gorm:"type:text;not null"`
+	// Url       string  `gorm:"type:text;not null"`
 	Image *string `gorm:"type:text"`
 
 	ReleaseDate time.Time     `gorm:"type:date"`
-	Duration    time.Duration `gorm:"-"`
+	Duration    time.Duration `gorm:"type:integer;not null"`
 	Registered  bool          `gorm:"type:integer;default:0"`
 }
 
+func (s Song) MarshalJSON() ([]byte, error) {
+	type Alias Song
+
+	url := fmt.Sprintf("%s/%s", "https://open.spotify.com/track", s.SpotifyID)
+	return json.Marshal(&struct {
+		Alias
+		Url string
+	}{
+		Alias: (Alias)(s),
+		Url:   url,
+	})
+}
+
 type Share struct {
-	ID            uint    `gorm:"primaryKey;autoIncrement"`
+	ID        uint           `gorm:"primaryKey;autoIncrement"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
 	MasterPercent float32 `gorm:"type:real;not null"`
 	PubPercent    float32 `gorm:"type:real;not null"`
 

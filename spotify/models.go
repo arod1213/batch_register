@@ -42,6 +42,7 @@ type playlistItem struct {
 
 type trackAlbum struct {
 	Href string `json:"href"`
+	ID   string `json:"id"`
 }
 
 type albumImage struct {
@@ -99,7 +100,8 @@ func (t track) toSong() models.Song {
 	duration, _ := time.ParseDuration(dStr)
 
 	return models.Song{
-		Url:      t.ExternalUrls.Spotify,
+		SpotifyID: t.ID,
+		// Url:      t.ExternalUrls.Spotify,
 		Duration: duration,
 		Title:    t.Name,
 		Artist:   artist,
