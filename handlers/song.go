@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/arod1213/auto_ingestion/middleware"
@@ -56,8 +57,7 @@ func GetSong(db *gorm.DB) gin.HandlerFunc {
 
 		var payments []royalties.Payment
 		if err := db.
-			Joins("LEFT JOIN shares on shares.id = payments.share_id").
-			Where("shares.song_id = ?", song.ID).
+			Where("song_id = ? AND user_id = ?", song.ID, userID).
 			Find(&payments).Error; err != nil {
 			c.JSON(400, gin.H{"error": "failed to load payments"})
 			return
@@ -75,6 +75,7 @@ func GetSong(db *gorm.DB) gin.HandlerFunc {
 				Items: payments,
 			},
 		}
+		log.Println("info is", info.Payments.Total)
 
 		c.JSON(200, gin.H{"data": info})
 	}
@@ -147,8 +148,7 @@ func DeleteShares(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		err = db.
-			Joins("LEFT JOIN songs on songs.id = shares.song_id").
-			Where("songs.id IN ? AND shares.user_id = ?", songIDs, userID).
+			Where("shares.song_id IN ? AND shares.user_id = ?", songIDs, userID).
 			Delete(&models.Share{}).
 			Error
 
