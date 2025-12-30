@@ -4,7 +4,6 @@ allow saving admin and pub info for mlc data
 public search for societies and admins and pubs (save ipi and detailed info)
 
 -- NET RECEIPTS
-get hash from gleam api and store into db (unique on hash + user)
 save usage type for gleam api when reading csvs
 store share percentage from csvs and cross reference from user input
 

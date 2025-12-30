@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"archive/zip"
-	"bytes"
 	"fmt"
 
 	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/models"
+	"github.com/arod1213/auto_ingestion/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -42,54 +41,13 @@ func DownloadRegistrations(db *gorm.DB) gin.HandlerFunc {
 			tx.Commit()
 		}()
 
-		buf := new(bytes.Buffer)
-		zipWriter := zip.NewWriter(buf)
-		count := 0
-
-		mlcFile, err := models.MLCWrite(shares, *user)
-		if err == nil {
-			f2, err := zipWriter.Create("mlc.xlsx")
-			if err != nil {
-				c.JSON(500, gin.H{"error": err.Error()})
-				return
-			}
-
-			_, err = f2.Write(mlcFile.Bytes())
-			if err != nil {
-				c.JSON(500, gin.H{"error": err.Error()})
-				return
-			}
-			count++
-		}
-
-		sxFile, err := models.SXWrite(shares)
-		if err == nil {
-			f1, err := zipWriter.Create("sx.xlsx")
-			if err != nil {
-				c.JSON(500, gin.H{"error": err.Error()})
-				return
-			}
-
-			_, err = f1.Write(sxFile.Bytes())
-			if err != nil {
-				c.JSON(500, gin.H{"error": err.Error()})
-				return
-			}
-			count++
-		}
-
-		err = zipWriter.Close()
+		data, err := services.WriteShares(shares, *user)
 		if err != nil {
-			c.JSON(500, gin.H{"error": fmt.Sprintf("Close failed: %v", err)})
-			return
-		}
-
-		if count == 0 {
-			c.JSON(500, gin.H{"error": "No files added"})
+			c.JSON(500, gin.H{"err": err.Error()})
 			return
 		}
 
 		c.Header("Content-Disposition", `attachment; filename="tracks.zip"`)
-		c.Data(200, "application/zip", buf.Bytes())
+		c.Data(200, "application/zip", *data)
 	}
 }
