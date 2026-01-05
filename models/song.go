@@ -62,10 +62,12 @@ func (s Song) MarshalJSON() ([]byte, error) {
 	url := fmt.Sprintf("%s/%s", "https://open.spotify.com/track", s.SpotifyID)
 	return json.Marshal(&struct {
 		Alias
-		Url string
+		Url     string
+		Seconds float64
 	}{
-		Alias: (Alias)(s),
-		Url:   url,
+		Alias:   (Alias)(s),
+		Url:     url,
+		Seconds: s.Duration.Seconds(),
 	})
 }
 
