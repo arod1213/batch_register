@@ -122,7 +122,7 @@ func FetchSongs(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var shares []models.Share
-		err = query.Preload("Song").Find(&shares).Error
+		err = query.Preload("Song").Order("songs.release_date DESC").Find(&shares).Error
 
 		if err != nil {
 			c.JSON(400, gin.H{"error": "could not find any songs"})
