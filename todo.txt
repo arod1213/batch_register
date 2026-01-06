@@ -2,6 +2,7 @@ potentially get all related songs from playlists - ex.) all related isrcs
 store discog and provide resync discog button
 allow saving admin and pub info for mlc data
 public search for societies and admins and pubs (save ipi and detailed info)
+ingest songs from genius links as well
 
 -- NET RECEIPTS
 save usage type for gleam api when reading csvs
