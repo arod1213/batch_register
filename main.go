@@ -45,8 +45,9 @@ func main() {
 	r.POST("/login", handlers.Login(db))
 
 	// SIMPLE CRUD
-	r.GET("/user", middleware.Auth(), handlers.GetMe(db)) // user profile info
-	r.PUT("/user/:id", handlers.UpdateUser(db))           // update user profile
+	r.GET("/user", middleware.Auth(), handlers.GetMe(db))                 // user profile info
+	r.PUT("/user/identify", middleware.Auth(), handlers.IdentifyUser(db)) // user profile info
+	r.PUT("/user/update/:id", handlers.UpdateUser(db))                    // update user profile
 
 	r.GET("/song/:songID", middleware.Auth(), handlers.GetSong(db))   // song overview for user
 	r.GET("/songs", middleware.Auth(), handlers.FetchSongs(db))       // fetch user songs

@@ -47,7 +47,7 @@ func GeniusSearch(keyword string) ([]GeniusSearchHit, error) {
 	return response.Response.Hits, nil
 }
 
-func GeniusSearchArtists(keyword string, artistName string) ([]*Artist, error) {
+func GeniusSearchArtists(keyword string, artistName string) ([]Artist, error) {
 	hits, err := GeniusSearch(keyword)
 	if err != nil {
 		return nil, err
@@ -88,10 +88,10 @@ func GeniusSearchArtists(keyword string, artistName string) ([]*Artist, error) {
 	wg.Wait()
 	close(ch)
 
-	artistMap := make(map[int]*Artist)
+	artistMap := make(map[uint]Artist)
 	for match := range ch {
 		for _, artist := range match {
-			artistMap[artist.ID] = artist
+			artistMap[artist.ID] = *artist
 		}
 	}
 

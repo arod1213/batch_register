@@ -63,7 +63,7 @@ type Song struct {
 // }
 
 type Artist struct {
-	ID         int    `json:"id"`
+	ID         uint   `json:"id"`
 	Name       string `json:"name"`
 	IsVerified bool   `json:"is_verified"`
 	ApiPath    string `json:"api_path"`
