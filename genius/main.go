@@ -9,11 +9,11 @@ import (
 	"github.com/arod1213/auto_ingestion/utils"
 )
 
-type ArtistSongs struct {
-	Response Response `json:"response"`
+type wrapper[T any] struct {
+	Response T `json:"response"`
 }
 
-type Response struct {
+type ArtistSongs struct {
 	Songs []Song `json:"songs"`
 }
 
@@ -31,6 +31,8 @@ type Song struct {
 	PrimaryArtists        []Artist `json:"primary_artists"`
 	HeaderImageUrl        string   `json:"header_image_url"`
 	Missing               bool     `json:"missing"`
+	ProducerArtists       []Artist `json:"producer_artists"`
+	WriterArtists         []Artist `json:"writer_artists"`
 
 	// Stats                 Stats    `json:"stats"`
 	// AnnotationCount                           int                   `json:"annotation_count"`
@@ -66,8 +68,8 @@ type Artist struct {
 	IsVerified bool   `json:"is_verified"`
 	ApiPath    string `json:"api_path"`
 	Iq         int    `json:"iq"`
+	ImageUrl   string `json:"image_url"`
 	// Url        string `json:"url"`
-	// ImageUrl       string `json:"image_url"`
 	// HeaderImageUrl string `json:"header_image_url"`
 	// IsMemeVerified bool   `json:"is_meme_verified"`
 }
@@ -81,11 +83,11 @@ func GetArtistSongs(artistId uint, accessToken string) ([]Song, error) {
 		return nil, err
 	}
 
-	var songs ArtistSongs
-	err = json.Unmarshal(body, &songs)
+	var res wrapper[ArtistSongs]
+	err = json.Unmarshal(body, &res)
 	if err != nil {
 		log.Println("error unmarshalling response: ", err)
 		return nil, err
 	}
-	return songs.Response.Songs, nil
+	return res.Response.Songs, nil
 }

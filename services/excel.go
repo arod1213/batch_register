@@ -3,6 +3,7 @@ package services
 import (
 	"archive/zip"
 	"bytes"
+
 	"github.com/arod1213/auto_ingestion/models"
 )
 
@@ -52,4 +53,3 @@ func WriteShares(shares []models.Share, user models.User) (*[]byte, error) {
 	data := buf.Bytes()
 	return &data, nil
 }
-

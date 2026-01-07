@@ -10,6 +10,28 @@ import (
 	"gorm.io/gorm"
 )
 
+func DownloadAllShares(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user, err := middleware.GetUser(c, db)
+		if err != nil {
+			c.JSON(401, gin.H{"err": "unauthorized"})
+			return
+		}
+		var shares []models.Share
+		err = db.Where("user_id = ?", user.ID).Find(&shares).Error
+		if err != nil {
+			c.JSON(400, gin.H{"err": err.Error()})
+			return
+		}
+		data, err := services.WriteShares(shares, *user)
+		if err != nil {
+			c.JSON(500, gin.H{"err": err.Error()})
+		}
+		c.Header("Content-Disposition", `attachment; filename="tracks.zip"`)
+		c.Data(200, "application/zip", *data)
+	}
+}
+
 func DownloadRegistrations(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var shares []models.Share

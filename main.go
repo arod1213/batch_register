@@ -44,8 +44,6 @@ func main() {
 	r.POST("/signup", handlers.Signup(db))
 	r.POST("/login", handlers.Login(db))
 
-	r.GET("/genius/:artistID", middleware.Auth(), handlers.GetMissingSongs(db)) // param for artist_id
-
 	// SIMPLE CRUD
 	r.GET("/user", middleware.Auth(), handlers.GetMe(db)) // user profile info
 	r.PUT("/user/:id", handlers.UpdateUser(db))           // update user profile
@@ -62,11 +60,17 @@ func main() {
 	r.GET("/payments/song/:songID", middleware.Auth(), handlers.GetPayments(db)) // read payments for song by user
 
 	// EXCEL GENERATION
-	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db)) // download excel
+	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db)) // download shares as excel
+	r.POST("/download/all", middleware.Auth(), handlers.DownloadAllShares(db)) // download all shares as excel
 
 	// SPOTIFY CALLS
 	r.GET("/read/preview/:id", handlers.FetchTracks())                     // preview spotify catalog
 	r.GET("/read/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db)) // import spotify catalog
+
+	// GENIUS CALLS
+	r.GET("/genius/artist/:artistID", middleware.Auth(), handlers.GetMissingSongs(db)) // param for genius artist id
+	r.GET("/genius/search", handlers.GeniusSearch(db))                                 // query param for keyword
+	r.GET("/genius/search/artist", handlers.GeniusSearchArtistIDs(db))                 // query param for keyword
 
 	err = http.ListenAndServe(":8080", r.Handler())
 	if err != nil {

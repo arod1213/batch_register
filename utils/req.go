@@ -60,11 +60,11 @@ func FetchBody(endpoint string, accessToken string, requestType string, params u
 	}
 	defer resp.Body.Close()
 
-	// statusCode := resp.StatusCode
-	// if statusCode < 200 || statusCode > 200 {
-	// 	errStr := fmt.Sprintln("Bad request: received non 200 err code")
-	// 	return []byte{}, errors.New(errStr)
-	// }
+	statusCode := resp.StatusCode
+	if statusCode < 200 || statusCode > 200 {
+		errStr := fmt.Sprintln("Bad request: received non 200 err code")
+		return []byte{}, errors.New(errStr)
+	}
 
 	// Read response
 	body, err := io.ReadAll(resp.Body)
@@ -72,7 +72,6 @@ func FetchBody(endpoint string, accessToken string, requestType string, params u
 		fmt.Println("Read error:", err)
 		return nil, err
 	}
-	fmt.Println("body: ", string(body))
 
 	return body, err
 }
