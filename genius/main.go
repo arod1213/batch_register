@@ -29,11 +29,12 @@ type Song struct {
 	FeaturedArtists       []Artist `json:"featured_artists"`
 	PrimaryArtist         Artist   `json:"primary_artist"`
 	PrimaryArtists        []Artist `json:"primary_artists"`
+	HeaderImageUrl        string   `json:"header_image_url"`
+	Missing               bool     `json:"missing"`
 
 	// Stats                 Stats    `json:"stats"`
 	// AnnotationCount                           int                   `json:"annotation_count"`
 	// HeaderImageThumbnailUrl                   string                `json:"header_image_thumbnail_url"`
-	// HeaderImageUrl                            string                `json:"header_image_url"`
 	// LyricsOwnerId                             int                   `json:"lyrics_owner_id"`
 	// LyricsState                               string                `json:"lyrics_state"`
 	// Path                                      string                `json:"path"`

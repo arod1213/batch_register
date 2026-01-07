@@ -12,8 +12,7 @@ func GetMissingSongs(db *gorm.DB, artistId uint, accessToken string, userID uint
 		return nil, err
 	}
 
-	var missingSongs []genius.Song
-	for _, song := range songs {
+	for i, song := range songs {
 		var share models.Share
 		err := db.
 			Joins("INNER JOIN songs on songs.id = shares.song_id").
@@ -24,12 +23,12 @@ func GetMissingSongs(db *gorm.DB, artistId uint, accessToken string, userID uint
 
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
-				missingSongs = append(missingSongs, song)
+				songs[i].Missing = true
 			} else {
 				continue
 			}
 		}
 	}
 
-	return missingSongs, nil
+	return songs, nil
 }
