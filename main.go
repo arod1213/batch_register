@@ -68,9 +68,9 @@ func main() {
 	r.GET("/read/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db)) // import spotify catalog
 
 	// GENIUS CALLS
-	r.GET("/genius/artist/:artistID", middleware.Auth(), handlers.GetMissingSongs(db)) // param for genius artist id
-	r.GET("/genius/search", handlers.GeniusSearch(db))                                 // query param for keyword
-	r.GET("/genius/search/artist", handlers.GeniusSearchArtistIDs(db))                 // query param for keyword
+	r.GET("/genius/artist", middleware.Auth(), handlers.GetMissingSongs(db)) // param for genius artist id
+	r.GET("/genius/search", handlers.GeniusSearch(db))                       // query param for keyword
+	r.GET("/genius/search/artist", handlers.GeniusSearchArtistIDs(db))       // query param for keyword
 
 	err = http.ListenAndServe(":8080", r.Handler())
 	if err != nil {

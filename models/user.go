@@ -18,6 +18,7 @@ type User struct {
 	PubIpi    uint64  `gorm:"type:integer;not null"`
 	WriterIpi uint64  `gorm:"type:integer;not null"`
 	DiscogID  *string `gorm:"type:text"`
+	GeniusID  *uint   `gorm:"type:integer"`
 }
 
 func (u User) MarshalJSON() ([]byte, error) {

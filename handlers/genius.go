@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"os"
-	"strconv"
 
 	"github.com/arod1213/auto_ingestion/genius"
 	"github.com/arod1213/auto_ingestion/middleware"
@@ -50,20 +49,22 @@ func GeniusSearch(db *gorm.DB) gin.HandlerFunc {
 
 func GetMissingSongs(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID, err := middleware.GetUserID(c)
+		user, err := middleware.GetUser(c, db)
 		if err != nil {
 			c.JSON(401, gin.H{"error": "unauthorized"})
 			return
 		}
 		accessToken := os.Getenv("GENIUS_ACCESS_TOKEN")
 
-		artistID, err := strconv.ParseUint(c.Param("artistID"), 10, 32)
-		if err != nil {
-			c.JSON(400, gin.H{"error": "bad request"})
+		var artistID uint
+		if user.GeniusID != nil {
+			artistID = *user.GeniusID
+		} else {
+			c.JSON(400, gin.H{"error": "artist not found"})
 			return
 		}
 
-		missingSongs, err := services.GetMissingSongs(db, uint(artistID), accessToken, userID)
+		missingSongs, err := services.GetMissingSongs(db, artistID, accessToken, user.ID)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
