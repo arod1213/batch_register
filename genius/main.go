@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 
 	"github.com/arod1213/auto_ingestion/utils"
 )
@@ -72,9 +71,8 @@ type Artist struct {
 	// IsMemeVerified bool   `json:"is_meme_verified"`
 }
 
-func GetArtistSongs(artistId string) ([]Song, error) {
-	href := fmt.Sprintf("https://api.genius.com/artists/%v/songs", artistId)
-	accessToken := os.Getenv("GENIUS_ACCESS_TOKEN")
+func GetArtistSongs(artistId uint, accessToken string) ([]Song, error) {
+	href := fmt.Sprintf("https://api.genius.com/artists/%d/songs", artistId)
 
 	body, err := utils.FetchBody(href, accessToken, "GET", url.Values{})
 	if err != nil {
