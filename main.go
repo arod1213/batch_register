@@ -44,7 +44,7 @@ func main() {
 	r.POST("/signup", handlers.Signup(db))
 	r.POST("/login", handlers.Login(db))
 
-	r.GET("/genius", middleware.Auth(), handlers.GetMissingSongs(db)) // query param for artist_id
+	r.GET("/genius/:artistID", middleware.Auth(), handlers.GetMissingSongs(db)) // param for artist_id
 
 	// SIMPLE CRUD
 	r.GET("/user", middleware.Auth(), handlers.GetMe(db)) // user profile info

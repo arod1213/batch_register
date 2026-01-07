@@ -19,8 +19,7 @@ func GetMissingSongs(db *gorm.DB) gin.HandlerFunc {
 		}
 		accessToken := os.Getenv("GENIUS_ACCESS_TOKEN")
 
-		// artistId := "2877875"
-		artistID, err := strconv.ParseUint(c.Query("artist_id"), 10, 32)
+		artistID, err := strconv.ParseUint(c.Param("artistID"), 10, 32)
 		if err != nil {
 			c.JSON(400, gin.H{"error": "bad request"})
 			return
