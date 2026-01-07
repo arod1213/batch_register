@@ -18,6 +18,12 @@ func IdentifyUser(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(404, gin.H{"error": "unauthorized"})
 			return
 		}
+
+		if user.GeniusID != nil {
+			c.JSON(200, gin.H{"data": "already identified"})
+			return
+		}
+
 		var songs []models.Song
 		err = db.
 			Joins("LEFT JOIN shares on shares.song_id = songs.id").

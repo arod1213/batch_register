@@ -24,7 +24,7 @@ func IdentifyUser(db *gorm.DB, user models.User, songs []models.Song) (models.Us
 			artistMap[artist.ID] = artist
 		}
 		if len(artists) == 1 {
-			break // prevent unnecessary letters
+			break // prevent unnecessary loops
 		}
 	}
 	allArtists := slices.Collect(maps.Values(artistMap))
