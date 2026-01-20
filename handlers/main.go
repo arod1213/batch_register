@@ -29,7 +29,7 @@ func FetchAndSaveTracks(db *gorm.DB) gin.HandlerFunc {
 
 		shares, err := services.SaveSongs(db, userID, songs)
 		if err != nil {
-			c.JSON(400, gin.H{"error": "failed to save songs"})
+			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
 

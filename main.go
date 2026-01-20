@@ -65,8 +65,8 @@ func main() {
 	r.POST("/download/all", middleware.Auth(), handlers.DownloadAllShares(db)) // download all shares as excel
 
 	// SPOTIFY CALLS
-	r.GET("/read/preview/:id", handlers.FetchTracks())                     // preview spotify catalog
-	r.GET("/read/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db)) // import spotify catalog
+	r.GET("/read/preview/:id", handlers.FetchTracks())                          // preview spotify catalog
+	r.GET("/read/save/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db)) // import spotify catalog
 
 	// GENIUS CALLS
 	r.GET("/genius/artist", middleware.Auth(), handlers.GetMissingSongs(db)) // param for genius artist id
