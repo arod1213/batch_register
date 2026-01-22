@@ -28,6 +28,8 @@ func main() {
 	}
 
 	r := gin.Default()
+	// Prevent accidental infinite polling loops from spamming logs/DB.
+	r.Use(middleware.RateLimitSongs(10, time.Second))
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
 			"http://localhost:5173",

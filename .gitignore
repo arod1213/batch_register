@@ -6,3 +6,5 @@ test.db
 web/*
 web
 csvs/*
+output/
+output.zip
