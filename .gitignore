@@ -8,3 +8,5 @@ web
 csvs/*
 output/
 output.zip
+go.work
+go.work.sum
