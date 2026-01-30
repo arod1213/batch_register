@@ -13,11 +13,13 @@ import (
 )
 
 func IdentifyUser(db *gorm.DB, user models.User, songs []models.Song) (models.User, error) {
+	fullName := fmt.Sprintf("%s %s", user.FirstName, user.LastName)
+	log.Printf("searching for %s\n", fullName)
+
 	artistMap := make(map[uint]genius.Artist)
 	for _, song := range songs {
-		log.Printf("looking at %s\n", song.Title)
+		log.Printf("looking at %s by %s\n", song.Title, song.Artist)
 		keyword := fmt.Sprintf("%s %s", song.Artist, song.Title)
-		fullName := fmt.Sprintf("%s %s", user.FirstName, user.LastName)
 		artists, err := genius.GeniusSearchArtists(keyword, fullName)
 		if err != nil {
 			continue
@@ -32,12 +34,20 @@ func IdentifyUser(db *gorm.DB, user models.User, songs []models.Song) (models.Us
 	}
 
 	allArtists := slices.Collect(maps.Values(artistMap))
-	if len(allArtists) != 1 {
-		for artist := range allArtists {
+
+	switch len(allArtists) {
+	case 0:
+		return user, errors.New("no matches found")
+	case 1:
+		{
+		}
+	default:
+		for _, artist := range allArtists {
 			log.Println("found ", artist)
 		}
 		return user, errors.New("too many matches please provide a different song")
 	}
+
 	user.GeniusID = &allArtists[0].ID
 	err := db.Save(&user).Error
 	if err != nil {
