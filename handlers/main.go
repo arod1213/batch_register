@@ -10,6 +10,44 @@ import (
 	"gorm.io/gorm"
 )
 
+func FetchAndSaveTracks2(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user, err := middleware.GetUser(c, db)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		id := c.Param("id")
+		method := c.Query("method")
+		songs := services.GetSpotifyTracks(method, id)
+
+		if len(songs) == 0 {
+			c.JSON(400, gin.H{"error": "no songs found: ensure your playlist is public"})
+			return
+		}
+
+		shares, err := services.SaveSongs(db, user.ID, songs)
+		if err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+
+		if user.GeniusID == nil {
+			go func() {
+				_, err = services.IdentifyUser(db, *user, songs)
+				if err != nil {
+					log.Println("err is ", err.Error())
+					return
+				}
+			}()
+		}
+
+		c.JSON(200, gin.H{"data": shares})
+
+	}
+}
+
 func FetchAndSaveTracks(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, err := middleware.GetUserID(c)
