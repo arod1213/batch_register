@@ -70,6 +70,5 @@ func GetMissingSongs(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		c.JSON(200, gin.H{"data": missingSongs})
-		return
 	}
 }
