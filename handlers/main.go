@@ -41,9 +41,10 @@ func FetchAndSaveTracks2(db *gorm.DB) gin.HandlerFunc {
 					return
 				}
 				if u.GeniusID != nil {
-					log.Println("IDENTIFIED USER ", u.GeniusID)
+					log.Println("IDENTIFIED USER ", *u.GeniusID)
+				} else {
+					log.Println("FAILED to identify user")
 				}
-				log.Println("FAILED to identify user")
 			}()
 		}
 

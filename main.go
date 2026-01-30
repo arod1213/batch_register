@@ -27,16 +27,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Use a quieter logger: skip noisy endpoints like GET /songs (the UI may hit it frequently during load).
-	// Keep recovery middleware enabled.
 	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(gin.LoggerWithConfig(gin.LoggerConfig{
-		SkipPaths: []string{"/songs"},
-	}))
-	// Prevent accidental infinite polling loops from spamming DB.
-	// Slightly higher ceiling to avoid dev-only bursts tripping 429 while still protecting the server.
-	r.Use(middleware.RateLimitSongs(40, time.Second))
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
 			"http://localhost:5173",
