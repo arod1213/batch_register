@@ -35,11 +35,15 @@ func FetchAndSaveTracks2(db *gorm.DB) gin.HandlerFunc {
 
 		if user.GeniusID == nil {
 			go func() {
-				_, err = services.IdentifyUser(db, *user, songs)
+				u, err := services.IdentifyUser(db, *user, songs)
 				if err != nil {
 					log.Println("err is ", err.Error())
 					return
 				}
+				if u.GeniusID != nil {
+					log.Println("IDENTIFIED USER ", u.GeniusID)
+				}
+				log.Println("FAILED to identify user")
 			}()
 		}
 
