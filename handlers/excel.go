@@ -68,6 +68,10 @@ func DownloadRegistrations(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(500, gin.H{"err": err.Error()})
 			return
 		}
+		if data == nil {
+			c.JSON(500, gin.H{"err": "data is empty"})
+			return
+		}
 
 		c.Header("Content-Disposition", `attachment; filename="tracks.zip"`)
 		c.Data(200, "application/zip", *data)
