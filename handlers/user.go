@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/models"
@@ -10,6 +11,35 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+func SearchUsers(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		_, err := middleware.GetUserID(c)
+		if err != nil {
+			c.JSON(404, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		name := c.Query("name")
+		words := strings.Split(name, " ")
+
+		query := db
+		for _, word := range words {
+			param := "%" + word + "%"
+			query = query.Where("first_name LIKE ? OR last_name LIKE ? OR username LIKE ?", param, param, param)
+		}
+
+		var users []models.User
+		err = query.Find(&users).Error
+		if err != nil {
+			c.JSON(500, gin.H{"error": "could not find user"})
+			return
+		}
+
+		c.JSON(200, gin.H{"data": users})
+	}
+}
 
 func IdentifyUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
