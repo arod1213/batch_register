@@ -21,7 +21,7 @@ func GetRoyaltyOverview(db *gorm.DB, statementID uint) (*RoyaltyOverview, error)
 
 	err := db.
 		Table("payments p").
-		Select("s.*, SUM(p.earnings) AS total").
+		Select("s.*, COALESCE(SUM(p.earnings), 0) AS total").
 		Joins("JOIN songs s ON s.id = p.song_id").
 		Where("p.statement_id = ?", statementID).
 		Group("s.id").
@@ -33,7 +33,7 @@ func GetRoyaltyOverview(db *gorm.DB, statementID uint) (*RoyaltyOverview, error)
 	// Overall total
 	err = db.
 		Table("payments").
-		Select("SUM(earnings)").
+		Select("COALESCE(SUM(earnings), 0)").
 		Where("statement_id = ?", statementID).
 		Scan(&overview.Total).Error
 	if err != nil {
