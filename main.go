@@ -69,7 +69,7 @@ func main() {
 	r.GET("/read/save/:id", middleware.Auth(), handlers.FetchAndSaveTracks2(db))   // import spotify catalog
 	r.GET("/read/saveOld/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db)) // import spotify catalog
 
-	r.GET("/user/search", handlers.SearchUsers(db)) // search public users query param name
+	r.GET("/user/search", middleware.Auth(), handlers.SearchUsers(db)) // search public users query param name
 
 	// GENIUS CALLS
 	r.GET("/genius/artist", middleware.Auth(), handlers.GetMissingSongs(db)) // param for genius artist id
