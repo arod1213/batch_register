@@ -11,9 +11,28 @@ import (
 
 	"github.com/arod1213/auto_ingestion/middleware"
 	"github.com/arod1213/auto_ingestion/royalties"
+	"github.com/arod1213/auto_ingestion/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+func FetchStatement(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("statementID")
+		sId, err := strconv.ParseUint(id, 10, 32)
+		if err != nil {
+			c.JSON(404, gin.H{"error": "invalid id"})
+			return
+		}
+		statementID := uint(sId)
+		overview, err := services.GetRoyaltyOverview(db, statementID)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "failed to read statement"})
+			return
+		}
+		c.JSON(200, gin.H{"data": overview})
+	}
+}
 
 func RescanPayments(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
