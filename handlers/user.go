@@ -60,11 +60,22 @@ func GetMe(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		authed, err := middleware.GetUser(c, db)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "unauthorized"})
+			return
+		}
+
 		id := c.Param("id")
 		userID, err := strconv.ParseUint(id, 10, 32)
 		if err != nil {
 			fmt.Println("conv err is ", err.Error())
 			c.JSON(400, gin.H{"error": "bad request"})
+			return
+		}
+
+		if authed.ID != uint(userID) {
+			c.JSON(403, gin.H{"error": "forbidden"})
 			return
 		}
 
@@ -79,6 +90,16 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 		if user.ID != uint(userID) {
 			c.JSON(400, gin.H{"error": "bad request"})
 			return
+		}
+
+		// Only allow updating the authenticated user.
+		// GORM Save() will overwrite every field, so we ensure we're saving against the authed row.
+		user.ID = authed.ID
+		user.Username = authed.Username
+		// Preserve password unless the client sends the existing (hashed) value.
+		// (The frontend uses GET /user then PUT /user/update/:id with the full record.)
+		if user.Password == "" {
+			user.Password = authed.Password
 		}
 
 		err = db.Save(&user).Error
