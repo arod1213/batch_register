@@ -122,15 +122,10 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Only allow updating the authenticated user.
-		// GORM Save() will overwrite every field, so we ensure we're saving against the authed row.
-		user.ID = authed.ID
 		user.Username = authed.Username
-		// Preserve password unless the client sends the existing (hashed) value.
-		// (The frontend uses GET /user then PUT /user/update/:id with the full record.)
-		if user.Password == "" {
-			user.Password = authed.Password
-		}
+		// if user.Password == "" {
+		// 	user.Password = authed.Password
+		// }
 
 		err = db.Save(&user).Error
 		if err != nil {
