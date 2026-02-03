@@ -121,6 +121,7 @@ func SaveRoyalties(db *gorm.DB) gin.HandlerFunc {
 			c.String(500, fmt.Sprintln("failed to save payments"))
 			return
 		}
+		log.Println("statement ID is ", id)
 		c.JSON(200, gin.H{"data": id})
 	}
 }
