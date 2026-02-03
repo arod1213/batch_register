@@ -99,7 +99,6 @@ func SaveRoyalties(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		royalties.SavePayments(db, userID, payments)
-		log.Println("payments received ", len(payments))
-		c.JSON(200, gin.H{"data": "success"})
+		c.JSON(200, gin.H{"data": payments})
 	}
 }
