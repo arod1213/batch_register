@@ -28,7 +28,7 @@ func FetchStatement(db *gorm.DB) gin.HandlerFunc {
 		statementID := uint(sId)
 		overview, err := services.GetRoyaltyOverview(db, statementID)
 		if err != nil {
-			c.JSON(500, gin.H{"error": "failed to read statement"})
+			c.JSON(500, gin.H{"error": fmt.Sprintf("failed to read statement %s", err.Error())})
 			return
 		}
 		c.JSON(200, gin.H{"data": overview})
