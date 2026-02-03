@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -98,7 +97,11 @@ func SaveRoyalties(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		royalties.SavePayments(db, userID, payments)
-		c.JSON(200, gin.H{"data": payments})
+		id, err := royalties.SavePayments(db, userID, payments)
+		if err != nil {
+			c.String(500, fmt.Sprintln("failed to save payments"))
+			return
+		}
+		c.JSON(200, gin.H{"data": id})
 	}
 }

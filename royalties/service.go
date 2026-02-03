@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/arod1213/auto_ingestion/models"
+	"github.com/arod1213/auto_ingestion/royalties"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -46,7 +47,14 @@ func (p ExtPayment) ToPayment(songID *uint, userID uint) Payment {
 	}
 }
 
-func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) error {
+func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) (uint, error) {
+	var s Statement
+	err := db.Create(&s).Error
+	if err != nil {
+		log.Println("failed to create payment")
+		return 0, err
+	}
+
 	cache := make(map[string]uint)
 	var payments []Payment
 
@@ -55,23 +63,25 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) error {
 		if err != nil {
 			continue
 		}
+		payment.StatementID = s.ID
+
 		payments = append(payments, *payment)
 		if len(payments) >= 1000 {
 			err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
 			if err != nil {
 				log.Println("failed to save payments", err.Error())
-				return err
+				return 0, err
 			}
 			payments = []Payment{} // reset
 		}
 	}
 
-	err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
+	err = db.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
 	if err != nil {
 		log.Println("failed to save payments", err.Error())
-		return err
+		return 0, err
 	}
-	return nil
+	return s.ID, nil
 }
 
 func (p ExtPayment) FindPayment(db *gorm.DB, userID uint, cache map[string]uint) (*Payment, error) {

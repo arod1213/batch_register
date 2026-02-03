@@ -15,6 +15,11 @@ import (
 	"github.com/arod1213/auto_ingestion/spotify"
 )
 
+type Statement struct {
+	ID   uint   `gorm:"primaryKey;autoIncrement"`
+	Name string `gorm:"type:text"`
+}
+
 type Payment struct {
 	ID   uint   `gorm:"primaryKey;autoIncrement"`
 	Hash string `gorm:"type:text;not null;index:idx_hash_share,unique"`
@@ -31,6 +36,9 @@ type Payment struct {
 
 	UserID uint        `gorm:"type:varchar(15);not null;index:idx_hash_share,unique"`
 	User   models.User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
+
+	StatementID uint      `gorm:"type:varchar(15);not null"`
+	Statement   Statement `gorm:"foreignKey:StatementID;references:ID;constraint:OnDelete:CASCADE;"`
 }
 
 type payor struct {
