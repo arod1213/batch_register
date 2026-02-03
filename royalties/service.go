@@ -47,10 +47,13 @@ func (p ExtPayment) ToPayment(songID *uint, userID uint) Payment {
 }
 
 func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) (uint, error) {
+	tx := db.Begin()
+
 	var s Statement
-	err := db.Create(&s).Error
+	err := tx.Create(&s).Error
 	if err != nil {
 		log.Println("failed to create payment")
+		tx.Rollback()
 		return 0, err
 	}
 
@@ -58,7 +61,7 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) (uint, error) {
 	var payments []Payment
 
 	for _, p := range list {
-		payment, err := p.FindPayment(db, userID, cache)
+		payment, err := p.FindPayment(tx, userID, cache)
 		if err != nil {
 			continue
 		}
@@ -66,20 +69,29 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) (uint, error) {
 
 		payments = append(payments, *payment)
 		if len(payments) >= 1000 {
-			err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
+			err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
 			if err != nil {
 				log.Println("failed to save payments", err.Error())
+				tx.Rollback()
 				return 0, err
 			}
 			payments = []Payment{} // reset
 		}
 	}
 
-	err = db.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
+	err = tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&payments).Error
 	if err != nil {
 		log.Println("failed to save payments", err.Error())
+		tx.Rollback()
 		return 0, err
 	}
+
+	if len(payments) == 0 {
+		tx.Rollback()
+		return 0, errors.New("no new payments inserted")
+	}
+
+	tx.Commit()
 	return s.ID, nil
 }
 
