@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/arod1213/auto_ingestion/models"
-	"github.com/arod1213/auto_ingestion/royalties"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
