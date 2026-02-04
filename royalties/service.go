@@ -95,7 +95,7 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) (uint, error) {
 	}
 
 	s.Payor = payments[0].Payor
-	err = db.Save(&s).Error
+	err = tx.Save(&s).Error
 	if err != nil {
 		tx.Rollback()
 		return 0, err
