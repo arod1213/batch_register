@@ -41,29 +41,34 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	var dev bool = false
+	if os.Getenv("IS_DEV") == "TRUE" {
+		dev = true
+	}
+
 	// AUTH
 	r.POST("/signup", handlers.Signup(db))
 	r.POST("/login", handlers.Login(db))
 
 	// SIMPLE CRUD
-	r.GET("/user", middleware.Auth(), handlers.GetMe(db))                 // user profile info
-	r.PUT("/user/identify", middleware.Auth(), handlers.IdentifyUser(db)) // user profile info
-	r.PUT("/user/update/:id", middleware.Auth(), handlers.UpdateUser(db)) // update user profile
+	r.GET("/user", middleware.Auth(dev), handlers.GetMe(db))                 // user profile info
+	r.PUT("/user/identify", middleware.Auth(dev), handlers.IdentifyUser(db)) // user profile info
+	r.PUT("/user/update/:id", middleware.Auth(dev), handlers.UpdateUser(db)) // update user profile
 
-	r.GET("/song/:songID", middleware.Auth(), handlers.GetSong(db))   // song overview for user
-	r.GET("/songs", middleware.Auth(), handlers.FetchSongs(db))       // fetch user songs
-	r.POST("/songs", middleware.Auth(), handlers.SaveTracks(db))      // create songs
-	r.DELETE("/shares", middleware.Auth(), handlers.DeleteShares(db)) // provide list of song ids in body
-	r.PUT("/share/:id", handlers.SaveShare(db))                       // update share for user
+	r.GET("/song/:songID", middleware.Auth(dev), handlers.GetSong(db))   // song overview for user
+	r.GET("/songs", middleware.Auth(dev), handlers.FetchSongs(db))       // fetch user songs
+	r.POST("/songs", middleware.Auth(dev), handlers.SaveTracks(db))      // create songs
+	r.DELETE("/shares", middleware.Auth(dev), handlers.DeleteShares(db)) // provide list of song ids in body
+	r.PUT("/share/:id", handlers.SaveShare(db))                          // update share for user
 	// r.POST("/register/:isrc", handlers.MarkRegistered(db))            // mark registered
 
-	r.POST("/payments/scan", middleware.Auth(), handlers.RescanPayments(db))     // insert new payments
-	r.POST("/payments", middleware.Auth(), handlers.SaveRoyalties(db))           // insert new payments
-	r.GET("/payments/song/:songID", middleware.Auth(), handlers.GetPayments(db)) // read payments for song by user
+	r.POST("/payments/scan", middleware.Auth(dev), handlers.RescanPayments(db))     // insert new payments
+	r.POST("/payments", middleware.Auth(dev), handlers.SaveRoyalties(db))           // insert new payments
+	r.GET("/payments/song/:songID", middleware.Auth(dev), handlers.GetPayments(db)) // read payments for song by user
 
 	// STATEMENTS
-	r.GET("/statement/:statementID", middleware.Auth(), handlers.FetchStatement(db)) // get overview for statement
-	r.GET("/statements", middleware.Auth(), handlers.GetStatements(db))              // get user statements
+	r.GET("/statement/:statementID", middleware.Auth(dev), handlers.FetchStatement(db)) // get overview for statement
+	r.GET("/statements", middleware.Auth(dev), handlers.GetStatements(db))              // get user statements
 	r.GET("/statements/:userID", func(c *gin.Context) {
 		id := c.Param("userID")
 		userID, _ := strconv.ParseUint(id, 10, 32)
@@ -71,20 +76,20 @@ func main() {
 	}, handlers.GetStatements(db)) // get user statements NO AUTH
 
 	// EXCEL GENERATION
-	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db)) // download shares as excel
-	r.POST("/download/all", middleware.Auth(), handlers.DownloadAllShares(db)) // download all shares as excel
+	r.POST("/download", middleware.Auth(dev), handlers.DownloadRegistrations(db)) // download shares as excel
+	r.POST("/download/all", middleware.Auth(dev), handlers.DownloadAllShares(db)) // download all shares as excel
 
 	// SPOTIFY CALLS
-	r.GET("/read/preview/:id", handlers.FetchTracks())                             // preview spotify catalog
-	r.GET("/read/save/:id", middleware.Auth(), handlers.FetchAndSaveTracks2(db))   // import spotify catalog
-	r.GET("/read/saveOld/:id", middleware.Auth(), handlers.FetchAndSaveTracks(db)) // import spotify catalog
+	r.GET("/read/preview/:id", handlers.FetchTracks())                                // preview spotify catalog
+	r.GET("/read/save/:id", middleware.Auth(dev), handlers.FetchAndSaveTracks2(db))   // import spotify catalog
+	r.GET("/read/saveOld/:id", middleware.Auth(dev), handlers.FetchAndSaveTracks(db)) // import spotify catalog
 
-	r.GET("/user/search", middleware.Auth(), handlers.SearchUsers(db)) // search public users query param name
+	r.GET("/user/search", middleware.Auth(dev), handlers.SearchUsers(db)) // search public users query param name
 
 	// GENIUS CALLS
-	r.GET("/genius/artist", middleware.Auth(), handlers.GetMissingSongs(db)) // param for genius artist id
-	r.GET("/genius/search", handlers.GeniusSearch(db))                       // query param for keyword
-	r.GET("/genius/search/artist", handlers.GeniusSearchArtistIDs(db))       // query param for keyword
+	r.GET("/genius/artist", middleware.Auth(dev), handlers.GetMissingSongs(db)) // param for genius artist id
+	r.GET("/genius/search", handlers.GeniusSearch(db))                          // query param for keyword
+	r.GET("/genius/search/artist", handlers.GeniusSearchArtistIDs(db))          // query param for keyword
 
 	err = http.ListenAndServe(":8080", r.Handler())
 	if err != nil {

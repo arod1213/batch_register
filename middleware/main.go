@@ -3,14 +3,28 @@ package middleware
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func Auth() gin.HandlerFunc {
+func DevMode() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		id := os.Getenv("MY_USER_ID")
+		userID, _ := strconv.ParseUint(id, 10, 32)
+		c.Set("userID", uint(userID))
+		c.Next()
+	}
+}
+
+func Auth(isDev bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if isDev {
+			DevMode()
+			return
+		}
 		authHeader := c.GetHeader("Authorization")
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			fmt.Println("Invalid Header")
