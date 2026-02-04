@@ -21,6 +21,7 @@ type Statement struct {
 
 	UserID uint        `gorm:"type:integer;not null" json:"-"`
 	User   models.User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;" json:"-"`
+	Count  int64       `gorm:"column:payment_count;->"`
 }
 
 type Payment struct {
