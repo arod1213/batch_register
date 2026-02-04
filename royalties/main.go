@@ -16,8 +16,9 @@ import (
 )
 
 type Statement struct {
-	ID   uint   `gorm:"primaryKey;autoIncrement"`
-	Name string `gorm:"type:text"`
+	ID    uint   `gorm:"primaryKey;autoIncrement"`
+	Name  string `gorm:"type:text"`
+	Payor string `gorm:"type:text;not null"`
 
 	UserID uint        `gorm:"type:integer;not null" json:"-"`
 	User   models.User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;" json:"-"`

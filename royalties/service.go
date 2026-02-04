@@ -51,6 +51,7 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) (uint, error) {
 
 	var s Statement = Statement{
 		UserID: userID,
+		Payor:  "N/A",
 	}
 	err := tx.Create(&s).Error
 	if err != nil {
@@ -91,6 +92,13 @@ func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) (uint, error) {
 	if len(payments) == 0 {
 		tx.Rollback()
 		return 0, errors.New("no new payments inserted")
+	}
+
+	s.Payor = payments[0].Payor
+	err = db.Save(&s).Error
+	if err != nil {
+		tx.Rollback()
+		return 0, err
 	}
 
 	tx.Commit()
