@@ -19,8 +19,8 @@ type Statement struct {
 	ID   uint   `gorm:"primaryKey;autoIncrement"`
 	Name string `gorm:"type:text"`
 
-	UserID uint        `gorm:"type:integer;not null"`
-	User   models.User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
+	UserID uint        `gorm:"type:integer;not null" json:"-"`
+	User   models.User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;" json:"-"`
 }
 
 type Payment struct {
