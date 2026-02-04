@@ -20,11 +20,10 @@ func DevMode() gin.HandlerFunc {
 }
 
 func Auth(isDev bool) gin.HandlerFunc {
+	if isDev {
+		return DevMode()
+	}
 	return func(c *gin.Context) {
-		if isDev {
-			DevMode()
-			return
-		}
 		authHeader := c.GetHeader("Authorization")
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			fmt.Println("Invalid Header")
