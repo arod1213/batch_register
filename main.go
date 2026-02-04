@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/arod1213/auto_ingestion/database"
@@ -63,6 +64,11 @@ func main() {
 	// STATEMENTS
 	r.GET("/statement/:statementID", middleware.Auth(), handlers.FetchStatement(db)) // get overview for statement
 	r.GET("/statements", middleware.Auth(), handlers.GetStatements(db))              // get user statements
+	r.GET("/statements/:userID", func(c *gin.Context) {
+		id := c.Param("userID")
+		userID, _ := strconv.ParseUint(id, 10, 32)
+		c.Set("userID", uint(userID))
+	}, handlers.GetStatements(db)) // get user statements NO AUTH
 
 	// EXCEL GENERATION
 	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db)) // download shares as excel
