@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -42,8 +43,12 @@ func main() {
 	}))
 
 	var dev bool = false
-	if os.Getenv("IS_DEV") == "TRUE" {
+	st := os.Getenv("IS_DEV")
+	if st == "TRUE" {
 		dev = true
+		log.Println("runnign in dev mode")
+	} else {
+		log.Println("running in prod mode", st)
 	}
 
 	// AUTH
