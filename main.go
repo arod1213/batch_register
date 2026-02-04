@@ -59,9 +59,10 @@ func main() {
 	r.POST("/payments/scan", middleware.Auth(), handlers.RescanPayments(db))     // insert new payments
 	r.POST("/payments", middleware.Auth(), handlers.SaveRoyalties(db))           // insert new payments
 	r.GET("/payments/song/:songID", middleware.Auth(), handlers.GetPayments(db)) // read payments for song by user
-	// r.GET("/statement/:statementID", middleware.Auth(), handlers.FetchStatement(db)) // get overview for statement
-	r.GET("/statement/:statementID", handlers.FetchStatement(db)) // get overview for statement
-	r.GET("/statements", handlers.GetStatements(db))              // get user statements
+
+	// STATEMENTS
+	r.GET("/statement/:statementID", middleware.Auth(), handlers.FetchStatement(db)) // get overview for statement
+	r.GET("/statements", middleware.Auth(), handlers.GetStatements(db))              // get user statements
 
 	// EXCEL GENERATION
 	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db)) // download shares as excel
