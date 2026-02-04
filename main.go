@@ -61,6 +61,7 @@ func main() {
 	r.GET("/payments/song/:songID", middleware.Auth(), handlers.GetPayments(db)) // read payments for song by user
 	// r.GET("/statement/:statementID", middleware.Auth(), handlers.FetchStatement(db)) // get overview for statement
 	r.GET("/statement/:statementID", handlers.FetchStatement(db)) // get overview for statement
+	r.GET("/statements", handlers.GetStatements(db))              // get user statements
 
 	// EXCEL GENERATION
 	r.POST("/download", middleware.Auth(), handlers.DownloadRegistrations(db)) // download shares as excel

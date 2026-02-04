@@ -49,7 +49,9 @@ func (p ExtPayment) ToPayment(songID *uint, userID uint) Payment {
 func SavePayments(db *gorm.DB, userID uint, list []ExtPayment) (uint, error) {
 	tx := db.Begin()
 
-	var s Statement
+	var s Statement = Statement{
+		UserID: userID,
+	}
 	err := tx.Create(&s).Error
 	if err != nil {
 		log.Println("failed to create payment")

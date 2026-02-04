@@ -17,6 +17,23 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetStatements(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserID(c)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "unauthorized"})
+			return
+		}
+		var statements []royalties.Statement
+		err = db.Where("user_id = ?", userID).Find(&statements).Error
+		if err != nil {
+			c.JSON(500, gin.H{"error": "failed to find statements"})
+			return
+		}
+		c.JSON(200, gin.H{"data": statements})
+	}
+}
+
 func FetchStatement(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("statementID")
