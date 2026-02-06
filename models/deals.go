@@ -18,6 +18,9 @@ type Credit struct {
 	UserID *uint `gorm:"type:varchar(15)"`
 	User   *User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
 
+	CreatedByUserID uint `gorm:"type:varchar(15);not null"`
+	CreatedByUser   User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
+
 	Role string `gorm:"type:text;not null"`
 }
 
@@ -33,6 +36,9 @@ type PubDeal struct {
 
 	UserID *uint `gorm:"type:varchar(15)"`
 	User   *User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
+
+	CreatedByUserID uint `gorm:"type:varchar(15);not null"`
+	CreatedByUser   User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
 
 	Percent float32 `gorm:"type:real;not null"`
 }
@@ -57,6 +63,9 @@ type MasterDeal struct {
 
 	UserID *uint `gorm:"type:varchar(15)"`
 	User   *User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
+
+	CreatedByUserID uint `gorm:"type:varchar(15);not null"`
+	CreatedByUser   User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
 
 	Fee          float32     `gorm:"type:real;not null"`
 	Advance      float32     `gorm:"type:real;not null"`

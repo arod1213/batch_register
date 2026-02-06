@@ -67,6 +67,12 @@ func main() {
 	r.PUT("/share/:id", handlers.SaveShare(db))                          // update share for user
 	// r.POST("/register/:isrc", handlers.MarkRegistered(db))            // mark registered
 
+	// DEALS
+	r.POST("deals/pub/:songID", middleware.Auth(dev), handlers.CreateDeals(db, false))
+	r.POST("deals/master/:songID", middleware.Auth(dev), handlers.CreateDeals(db, true))
+	r.DELETE("deal/pub/:songID/:dealID", middleware.Auth(dev), handlers.DeleteDeal(db, false))
+	r.DELETE("deal/master/:songID/:dealID", middleware.Auth(dev), handlers.DeleteDeal(db, true))
+
 	r.POST("/payments/scan", middleware.Auth(dev), handlers.RescanPayments(db))     // insert new payments
 	r.POST("/payments", middleware.Auth(dev), handlers.SaveRoyalties(db))           // insert new payments
 	r.GET("/payments/song/:songID", middleware.Auth(dev), handlers.GetPayments(db)) // read payments for song by user
