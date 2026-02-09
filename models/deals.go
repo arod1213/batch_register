@@ -30,6 +30,8 @@ type Credit struct {
 }
 
 type PubDeal struct {
+	ID uint `gorm:"primaryKey;autoIncrement"`
+
 	OverridingID   *uint    `goSongIDrm:"type:varchar(15)"`
 	OverridingDeal *PubDeal `gorm:"foreignKey:OverridingID;references:ID;constraint:OnDelete:CASCADE;"`
 
@@ -65,6 +67,8 @@ const (
 )
 
 type MasterDeal struct {
+	ID uint `gorm:"primaryKey;autoIncrement"`
+
 	OverridingID   *uint       `goSongIDrm:"type:varchar(15)"`
 	OverridingDeal *MasterDeal `gorm:"foreignKey:OverridingID;references:ID;constraint:OnDelete:CASCADE;"`
 
