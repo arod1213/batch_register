@@ -8,6 +8,11 @@ package models
 // 	User   User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
 // }
 
+type DealType interface {
+	GetSongID() uint
+	SetSongID(uint)
+}
+
 type Credit struct {
 	SongID uint `gorm:"type:varchar(15);not null"`
 	Song   Song `gorm:"foreignKey:SongID;references:ID;constraint:OnDelete:CASCADE;"`
@@ -44,6 +49,13 @@ type PubDeal struct {
 	Percent float32 `gorm:"type:real;not null"`
 }
 
+func (d PubDeal) GetSongID() uint {
+	return d.SongID
+}
+func (d *PubDeal) SetSongID(id uint) {
+	d.SongID = id
+}
+
 type RoyaltyType string
 
 const (
@@ -74,4 +86,12 @@ type MasterDeal struct {
 	Points       float32     `gorm:"type:real;not null"`
 	RoyaltyType  RoyaltyType `gorm:"type:text;not null"`
 	Territory    string      `gorm:"type:text;not null"`
+}
+
+func (d MasterDeal) GetSongID() uint {
+	return d.SongID
+}
+
+func (d *MasterDeal) SetSongID(id uint) {
+	d.SongID = id
 }

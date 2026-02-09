@@ -33,15 +33,15 @@ func DeleteDeal(db *gorm.DB, isMaster bool) gin.HandlerFunc {
 	}
 }
 
-func bindAndSave[T models.MasterDeal | models.PubDeal](c *gin.Context, db *gorm.DB, songID uint) error {
-	var vals []models.MasterDeal
+func bindAndSave[T models.DealType](c *gin.Context, db *gorm.DB, songID uint) error {
+	var vals []T
 	err := c.ShouldBindBodyWithJSON(&vals)
 	if err != nil {
 		c.JSON(440, gin.H{"error": "invalid body"})
 		return err
 	}
 	for i := range vals {
-		vals[i].SongID = uint(songID)
+		vals[i].SetSongID(uint(songID))
 	}
 	err = db.Save(&vals).Error
 	if err != nil {
@@ -62,12 +62,12 @@ func CreateDeals(db *gorm.DB, isMaster bool) gin.HandlerFunc {
 		}
 
 		if isMaster {
-			err = bindAndSave[models.MasterDeal](c, db, uint(songID))
+			err = bindAndSave[*models.MasterDeal](c, db, uint(songID))
 			if err != nil {
 				return
 			}
 		} else {
-			err = bindAndSave[models.PubDeal](c, db, uint(songID))
+			err = bindAndSave[*models.PubDeal](c, db, uint(songID))
 			if err != nil {
 				return
 			}
