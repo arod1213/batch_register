@@ -32,7 +32,8 @@ type PubDeal struct {
 	Song   Song `gorm:"foreignKey:SongID;references:ID;constraint:OnDelete:CASCADE;"`
 
 	// use name if not linking to verified user
-	Name string `gorm:"type:text;not null"`
+	Name      string  `gorm:"type:text;not null"`
+	AdminInfo *string `gorm:"type:text"`
 
 	UserID *uint `gorm:"type:varchar(15)"`
 	User   *User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;"`
